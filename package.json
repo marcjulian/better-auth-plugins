@@ -1,0 +1,14 @@
+{
+  "name": "better-auth-plugins",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:lead": "cd packages/lead && pnpm build",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.35.0"
+  },
+  "packageManager": "pnpm@10.30.2"
+}

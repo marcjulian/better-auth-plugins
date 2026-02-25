@@ -1,0 +1,7 @@
+packages:
+  - packages/**
+
+catalog:
+  better-auth: ^1.4.19
+  tsdown: ^0.20.3
+  zod: ^4.3.6
