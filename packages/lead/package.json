@@ -2,15 +2,15 @@
   "name": "better-auth-lead",
   "version": "0.0.1-dev.0",
   "description": "Better Auth Lead plugin",
-  "homepage": "https://github.com/author/library#readme",
+  "homepage": "https://github.com/marcjulian/better-auth-plugins#readme",
   "bugs": {
-    "url": "https://github.com/author/library/issues"
+    "url": "https://github.com/marcjulian/better-auth-plugins/issues"
   },
   "license": "MIT",
   "author": "Marc Stammerjohann <me@marcjulian.de>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/author/library.git"
+    "url": "git+https://github.com/marcjulian/better-auth-plugins.git"
   },
   "files": [
     "dist"
