@@ -1,0 +1,33 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'lead-v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Build
+        run: pnpm build:lead
+      - name: Publish to npm
+        run: pnpm publish --no-git-checks --access public --provenance
+        working-directory: packages/lead
+        env:
+          # NODE_AUTH_TOKEN is used by actions/setup-node to authenticate with npm
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
