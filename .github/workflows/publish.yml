@@ -27,7 +27,7 @@ jobs:
       - name: Build
         run: pnpm build:lead
       - name: Publish to npm
-        run: pnpm publish --no-git-checks --access public --provenance --tag dev
+        run: pnpm publish --no-git-checks --access public --tag dev
         working-directory: packages/lead
         env:
           # NODE_AUTH_TOKEN is used by actions/setup-node to authenticate with npm
