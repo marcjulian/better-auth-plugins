@@ -1,23 +1,44 @@
-# tsdown-starter
+# better-auth-lead
 
-A starter for creating a TypeScript package.
+Better Auth plugin to add lead table and API for newsletter/waitlist functionality.
 
-## Development
-
-- Install dependencies:
+## Installation
 
 ```bash
-npm install
+# npm
+npm install better-auth-lead
+# pnpm
+pnpm add better-auth-lead
+# yarn
+yarn add better-auth-lead
 ```
 
-- Run the unit tests:
+## Usage
 
-```bash
-npm run test
+```ts
+// server/auth.ts
+import { createBetterAuth } from '@better-auth/core';
+import { lead } from 'better-auth-lead';
+
+const betterAuth = createBetterAuth({
+  plugins: [lead()],
+});
 ```
 
-- Build the library:
+Run better auth migration to create the lead table:
 
 ```bash
-npm run build
+npx auth@latest generate
+```
+
+Add the lead plugin to your auth client:
+
+```ts
+// client/auth-client.ts
+import { createAuthClient } from 'better-auth/client';
+import { leadClient } from 'better-auth-lead/client';
+
+const authClient = createAuthClient({
+  plugins: [leadClient()],
+});
 ```
