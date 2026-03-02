@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "pnpm build:lead",
     "build:lead": "cd packages/lead && pnpm build",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check"
