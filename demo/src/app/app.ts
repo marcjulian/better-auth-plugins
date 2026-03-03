@@ -1,18 +1,15 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { HlmToaster } from '@spartan-ng/helm/sonner';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, HlmToaster],
   template: `
     <router-outlet />
-  `,
-  styles: `
-    :host {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 2rem;
-      text-align: center;
+
+    @defer {
+      <hlm-toaster />
     }
   `,
 })

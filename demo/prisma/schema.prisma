@@ -75,3 +75,15 @@ model Verification {
   @@index([identifier])
   @@map("verification")
 }
+
+model Lead {
+  id            String   @id
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  email         String
+  emailVerified Boolean  @default(false)
+  metadata      String?
+
+  @@unique([email])
+  @@map("lead")
+}

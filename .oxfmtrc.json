@@ -4,5 +4,5 @@
   "experimentalTailwindcss": {
     "functions": ["hlm", "cva", "classes"]
   },
-  "ignorePatterns": []
+  "ignorePatterns": ["demo/src/server/generated/prisma/**/*"]
 }
