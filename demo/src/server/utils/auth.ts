@@ -1,10 +1,9 @@
 import { prismaAdapter } from '@better-auth/prisma-adapter';
+import { lead } from 'better-auth-lead';
 import { betterAuth } from 'better-auth/minimal';
 
 import { prisma } from './db';
 import env from './env';
-
-import { lead } from 'better-auth-lead';
 
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,

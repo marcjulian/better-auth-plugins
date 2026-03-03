@@ -1,10 +1,11 @@
 import { APIError, createAuthEndpoint, createEmailVerificationToken } from 'better-auth/api';
-import * as z from 'zod';
-import type { Lead, LeadOptions, LeadPayload } from './type';
 import { jwtVerify } from 'jose';
 import type { JWTPayload, JWTVerifyResult } from 'jose';
 import { JWTExpired } from 'jose/errors';
+import * as z from 'zod';
+
 import { LEAD_ERROR_CODES } from './error-codes';
+import type { Lead, LeadOptions, LeadPayload } from './type';
 
 const subscribeSchema = z.object({
   email: z.string().meta({

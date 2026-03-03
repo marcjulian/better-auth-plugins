@@ -1,6 +1,7 @@
 import { type BetterAuthPluginDBSchema } from 'better-auth';
-import type { LeadOptions } from './type';
 import { mergeSchema } from 'better-auth/db';
+
+import type { LeadOptions } from './type';
 
 export const lead = {
   lead: {

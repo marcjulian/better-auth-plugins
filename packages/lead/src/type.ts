@@ -1,4 +1,5 @@
 import type { InferOptionSchema } from 'better-auth';
+
 import type { lead } from './schema';
 
 export interface LeadOptions {

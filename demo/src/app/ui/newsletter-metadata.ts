@@ -1,18 +1,13 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { email, form, FormField, required, submit } from '@angular/forms/signals';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmInputImports } from '@spartan-ng/helm/input';
-import { HlmFieldImports } from '@spartan-ng/helm/field';
-import {
-  email,
-  form,
-  FormField,
-  required,
-  submit,
-} from '@angular/forms/signals';
-import { authClient } from '../auth-client';
-import { toast } from 'ngx-sonner';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmRadioGroupImports } from '@spartan-ng/helm/radio-group';
+import { toast } from 'ngx-sonner';
+
+import { authClient } from '../auth-client';
 
 @Component({
   selector: 'ba-newsletter-metadata',
@@ -29,9 +24,7 @@ import { HlmRadioGroupImports } from '@spartan-ng/helm/radio-group';
     class: 'block py-16',
   },
   template: `
-    <div
-      class="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-12 lg:gap-8 lg:px-8"
-    >
+    <div class="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-12 lg:gap-8 lg:px-8">
       <h2
         class="max-w-xl text-left text-3xl font-semibold tracking-tight text-balance text-gray-900 sm:text-4xl lg:col-span-7"
       >
@@ -40,12 +33,7 @@ import { HlmRadioGroupImports } from '@spartan-ng/helm/radio-group';
       <form class="max-w-md lg:col-span-5" (submit)="subscribe($event)">
         <hlm-field-group>
           <hlm-field>
-            <input
-              hlmInput
-              type="email"
-              placeholder="Enter your email"
-              [formField]="form.email"
-            />
+            <input hlmInput type="email" placeholder="Enter your email" [formField]="form.email" />
 
             <hlm-field-description class="text-left">
               We care about your data in our privacy policy.
@@ -76,24 +64,16 @@ import { HlmRadioGroupImports } from '@spartan-ng/helm/radio-group';
             </hlm-field-group>
             <hlm-field-group>
               <fieldset hlmFieldset>
-                <legend hlmFieldLegend variant="label">
-                  I'm interested in
-                </legend>
+                <legend hlmFieldLegend variant="label">I'm interested in</legend>
                 <hlm-field-group data-slot="checkbox-group">
                   @for (interest of interests; track interest.id) {
                     <hlm-field orientation="horizontal">
                       <hlm-checkbox
                         [id]="'interest-' + interest.id"
-                        [checked]="
-                          form.interests().value().includes(interest.id)
-                        "
+                        [checked]="form.interests().value().includes(interest.id)"
                         (checkedChange)="handleChange($event, interest.id)"
                       />
-                      <label
-                        hlmFieldLabel
-                        class="font-normal"
-                        [for]="'interest-' + interest.id"
-                      >
+                      <label hlmFieldLabel class="font-normal" [for]="'interest-' + interest.id">
                         {{ interest.label }}
                       </label>
                     </hlm-field>

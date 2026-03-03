@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { HlmButtonImports } from '@spartan-ng/helm/button';
-import { HlmInputImports } from '@spartan-ng/helm/input';
-import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { email, form, FormField, required, submit } from '@angular/forms/signals';
-import { authClient } from '../auth-client';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmFieldImports } from '@spartan-ng/helm/field';
+import { HlmInputImports } from '@spartan-ng/helm/input';
 import { toast } from 'ngx-sonner';
+
+import { authClient } from '../auth-client';
 
 @Component({
   selector: 'ba-newsletter',
