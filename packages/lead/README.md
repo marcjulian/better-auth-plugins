@@ -98,3 +98,57 @@ const { data, error } = await authClient.lead.update({
 ```
 
 ### Email Verification
+
+```ts
+// server/auth.ts
+import { betterAuth } from 'better-auth';
+import { lead } from 'better-auth-lead';
+import { sendEmail } from './email'; // your email sending function
+
+export const auth = betterAuth({
+  plugins: [
+    lead({
+      sendVerificationEmail: async ({ email, url, token }) => {
+        void sendEmail({
+          to: email,
+          subject: 'Newsletter: Verify your email address',
+          text: `Click the link to verify your email: ${url}`,
+        });
+      },
+    }),
+  ],
+});
+```
+
+> Avoid awaiting the email sending to prevent timing attacks.
+
+## Schema
+
+### Lead
+
+Table name: `lead`
+
+|  Field         |  Type   |  Key   |  Description                    |
+| -------------- | ------- | ------ | ------------------------------- |
+| id             | string  | pk     | Unique identifier for each lead |
+| email          | string  | unique | Email address of the lead       |
+|  emailVerified | boolean |        | Whether the email is verified   |
+| metadata       | json    | ?      | Additional data about the lead  |
+| createdAt      | date    |        | Timestamp of lead creation      |
+| updatedAt      | date    |        | Timestamp of last update        |
+
+#### Prisma
+
+```prisma
+model Lead {
+  id            String   @id
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  email         String
+  emailVerified Boolean  @default(false)
+  metadata      String?
+
+  @@unique([email])
+  @@map("lead")
+}
+```

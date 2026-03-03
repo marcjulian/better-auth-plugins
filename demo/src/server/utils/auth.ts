@@ -13,5 +13,11 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [lead()],
+  plugins: [
+    lead({
+      sendVerificationEmail: async ({ email, url, token }) => {
+        console.log({ email, url, token });
+      },
+    }),
+  ],
 });
