@@ -13,7 +13,7 @@ pnpm add better-auth-lead
 yarn add better-auth-lead
 ```
 
-## Usage
+Add the plugin to your auth config
 
 ```ts
 // server/auth.ts
@@ -42,3 +42,59 @@ const authClient = createAuthClient({
   plugins: [leadClient()],
 });
 ```
+
+## Usage
+
+### Subscribe
+
+```ts
+// POST /lead/subscribe
+const { data, error } = await authClient.lead.subscribe({
+  email: 'user@example.com',
+  // json object
+  metadata: {
+    preferences: 'engineering',
+  },
+});
+```
+
+### Verify
+
+```ts
+// GET /lead/verify
+await authClient.lead.verify({
+  query: {
+    token,
+  },
+});
+```
+
+### Unsubscribe
+
+```ts
+// POST /lead/unsubscribe
+const { data, error } = await authClient.lead.unsubscribe({ id: 'lead-id' });
+```
+
+### Resend
+
+```ts
+// POST /lead/resend
+const { data, error } = await authClient.lead.resend({
+  email: 'user@example.com',
+});
+```
+
+### Update
+
+```ts
+// POST /lead/update
+const { data, error } = await authClient.lead.update({
+  id: 'lead-id',
+  metadata: {
+    preferences: 'ai',
+  },
+});
+```
+
+### Email Verification

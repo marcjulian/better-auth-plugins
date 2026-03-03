@@ -4,10 +4,15 @@ import type { Lead, LeadOptions, LeadPayload } from './type';
 import { jwtVerify } from 'jose';
 import type { JWTPayload, JWTVerifyResult } from 'jose';
 import { JWTExpired } from 'jose/errors';
+import { LEAD_ERROR_CODES } from './error-codes';
 
 const subscribeSchema = z.object({
-  email: z.email(),
-  metadata: z.record(z.string(), z.any()).optional(),
+  email: z.string().meta({
+    description: 'Email address of the lead',
+  }),
+  metadata: z.record(z.string(), z.any()).optional().meta({
+    description: 'Additional metadata to store with the lead',
+  }),
 });
 
 export const subscribe = <O extends LeadOptions>(options: O) =>
@@ -22,6 +27,11 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
     },
     async (ctx) => {
       const { email, metadata } = ctx.body;
+
+      const isValidEmail = z.email().safeParse(email);
+      if (!isValidEmail.success) {
+        throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.INVALID_EMAIL);
+      }
 
       const normalizedEmail = email.toLowerCase();
 
@@ -92,7 +102,9 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
   );
 
 const verifySchema = z.object({
-  token: z.string(),
+  token: z.string().meta({
+    description: 'The token to verify the email',
+  }),
 });
 
 export const verify = <O extends LeadOptions>(options: O) =>
@@ -115,13 +127,9 @@ export const verify = <O extends LeadOptions>(options: O) =>
         });
       } catch (e) {
         if (e instanceof JWTExpired) {
-          throw new APIError('UNAUTHORIZED', {
-            message: 'Token expired',
-          });
+          throw APIError.from('UNAUTHORIZED', LEAD_ERROR_CODES.TOKEN_EXPIRED);
         }
-        throw new APIError('UNAUTHORIZED', {
-          message: 'Invalid token',
-        });
+        throw APIError.from('UNAUTHORIZED', LEAD_ERROR_CODES.INVALID_TOKEN);
       }
 
       const parsed = subscribeSchema.parse(jwt.payload);
@@ -168,7 +176,9 @@ export const verify = <O extends LeadOptions>(options: O) =>
   );
 
 const unsubscribeSchema = z.object({
-  id: z.string(),
+  id: z.string().meta({
+    description: 'The id of the lead to unsubscribe',
+  }),
 });
 
 export const unsubscribe = <O extends LeadOptions>(options: O) =>
@@ -217,7 +227,9 @@ export const unsubscribe = <O extends LeadOptions>(options: O) =>
   );
 
 const resendSchema = z.object({
-  email: z.email(),
+  email: z.string().meta({
+    description: 'Email address to resend the verification email to',
+  }),
 });
 
 export const resend = <O extends LeadOptions>(options: O) =>
@@ -232,6 +244,11 @@ export const resend = <O extends LeadOptions>(options: O) =>
     },
     async (ctx) => {
       const { email } = ctx.body;
+
+      const isValidEmail = z.email().safeParse(email);
+      if (!isValidEmail.success) {
+        throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.INVALID_EMAIL);
+      }
 
       const normalizedEmail = email.toLowerCase();
 
@@ -264,6 +281,63 @@ export const resend = <O extends LeadOptions>(options: O) =>
           options.sendVerificationEmail({ email: normalizedEmail, url, token }, ctx.request),
         );
       }
+
+      return ctx.json({
+        status: true,
+      });
+    },
+  );
+
+const updateSchema = z.object({
+  id: z.string().meta({
+    description: 'The id of the lead to update',
+  }),
+  metadata: z.record(z.string(), z.any()).optional().meta({
+    description: 'Additional metadata to store with the lead',
+  }),
+});
+
+export const update = <O extends LeadOptions>(options: O) =>
+  createAuthEndpoint(
+    '/lead/update',
+    {
+      method: 'POST',
+      body: updateSchema,
+      metadata: {
+        // TODO add openapi
+      },
+    },
+    async (ctx) => {
+      const { id, metadata } = ctx.body;
+
+      const lead = await ctx.context.adapter.findOne<Lead>({
+        model: 'lead',
+        where: [
+          {
+            field: 'id',
+            value: id,
+          },
+        ],
+      });
+
+      if (!lead) {
+        return ctx.json({
+          status: true,
+        });
+      }
+
+      await ctx.context.adapter.update<Lead>({
+        model: 'lead',
+        where: [
+          {
+            field: 'id',
+            value: id,
+          },
+        ],
+        update: {
+          metadata: metadata ? JSON.stringify(metadata) : lead.metadata,
+        },
+      });
 
       return ctx.json({
         status: true,
