@@ -21,9 +21,6 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
     {
       method: 'POST',
       body: subscribeSchema,
-      metadata: {
-        // TODO add openapi
-      },
     },
     async (ctx) => {
       const { email, metadata } = ctx.body;
@@ -100,9 +97,6 @@ export const verify = <O extends LeadOptions>(options: O) =>
     {
       method: 'GET',
       query: verifySchema,
-      metadata: {
-        // TODO add openapi
-      },
     },
     async (ctx) => {
       const { token } = ctx.query;
@@ -174,9 +168,6 @@ export const unsubscribe = <O extends LeadOptions>(options: O) =>
     {
       method: 'POST',
       body: unsubscribeSchema,
-      metadata: {
-        // TODO add openapi
-      },
     },
     async (ctx) => {
       const { id } = ctx.body;
@@ -225,9 +216,6 @@ export const resend = <O extends LeadOptions>(options: O) =>
     {
       method: 'POST',
       body: resendSchema,
-      metadata: {
-        // TODO add openapi
-      },
     },
     async (ctx) => {
       const { email } = ctx.body;
@@ -290,9 +278,6 @@ export const update = <O extends LeadOptions>(options: O) =>
     {
       method: 'POST',
       body: updateSchema,
-      metadata: {
-        // TODO add openapi
-      },
     },
     async (ctx) => {
       const { id, metadata } = ctx.body;
