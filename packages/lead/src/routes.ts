@@ -66,19 +66,6 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
             ],
           });
         }
-      } else if (!lead.emailVerified) {
-        lead = await ctx.context.adapter.update<Lead>({
-          model: 'lead',
-          where: [
-            {
-              field: 'email',
-              value: normalizedEmail,
-            },
-          ],
-          update: {
-            metadata: metadata ? JSON.stringify(metadata) : lead.metadata,
-          },
-        });
       }
 
       if (options.sendVerificationEmail && lead && !lead.emailVerified) {
