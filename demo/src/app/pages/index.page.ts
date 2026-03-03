@@ -1,13 +1,18 @@
 import { Component } from '@angular/core';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 
+import { Newsletter } from '../ui/newsletter';
+
 @Component({
   selector: 'app-home',
-  imports: [HlmButtonImports],
+  imports: [Newsletter, HlmButtonImports],
   template: `
-    <h1>Welcome to the Better Auth Plugins Demo!</h1>
+    <div>
+      <h1>Welcome to the Better Auth Plugins Demo!</h1>
+      <button hlmBtn>Click me</button>
+    </div>
 
-    <button hlmBtn>Click me</button>
+    <ba-newsletter />
   `,
 })
 export default class Home {}

@@ -1,5 +1,5 @@
-import { betterAuth } from 'better-auth/minimal';
 import { prismaAdapter } from '@better-auth/prisma-adapter';
+import { betterAuth } from 'better-auth/minimal';
 
 import { prisma } from './db';
 import env from './env';
