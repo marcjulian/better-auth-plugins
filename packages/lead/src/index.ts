@@ -1,9 +1,10 @@
 import type { BetterAuthPlugin } from 'better-auth';
 import type { LeadOptions } from './type';
 import { getSchema } from './schema';
-import { resend, subscribe, unsubscribe, verify } from './routes';
+import { resend, subscribe, unsubscribe, update, verify } from './routes';
+import { LEAD_ERROR_CODES } from './error-codes';
 
-export const lead = <O extends LeadOptions>(options: O) => {
+export const lead = <O extends LeadOptions>(options: O = {} as O) => {
   return {
     id: 'lead',
     schema: getSchema(options),
@@ -12,6 +13,7 @@ export const lead = <O extends LeadOptions>(options: O) => {
       verify: verify(options),
       unsubscribe: unsubscribe(options),
       resend: resend(options),
+      update: update(options),
     },
     options: options as NoInfer<O>,
     rateLimit: [
@@ -21,6 +23,7 @@ export const lead = <O extends LeadOptions>(options: O) => {
         max: options.rateLimit?.max ?? 3,
       },
     ],
+    $ERROR_CODES: LEAD_ERROR_CODES,
   } satisfies BetterAuthPlugin;
 };
 
