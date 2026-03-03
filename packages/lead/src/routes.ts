@@ -322,7 +322,7 @@ export const update = <O extends LeadOptions>(options: O) =>
           },
         ],
         update: {
-          metadata: metadata ? JSON.stringify(metadata) : lead.metadata,
+          metadata: metadata ? JSON.stringify(metadata) : undefined,
         },
       });
 
