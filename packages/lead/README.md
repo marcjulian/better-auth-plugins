@@ -11,6 +11,8 @@ npm install better-auth-lead
 pnpm add better-auth-lead
 # yarn
 yarn add better-auth-lead
+# bun
+bun add better-auth-lead
 ```
 
 Add the plugin to your auth config
@@ -28,7 +30,14 @@ const betterAuth = createBetterAuth({
 Run better auth migration to create the lead table:
 
 ```bash
+# npm
 npx auth@latest generate
+# pnpm
+pnpm dlx auth@latest generate
+# yarn
+yarn dlx auth@latest generate
+# bun
+bun x auth@latest generate
 ```
 
 Add the lead plugin to your auth client:
