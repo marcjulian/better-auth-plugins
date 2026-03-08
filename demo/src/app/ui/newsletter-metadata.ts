@@ -5,6 +5,7 @@ import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmRadioGroupImports } from '@spartan-ng/helm/radio-group';
+import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { toast } from 'ngx-sonner';
 
 import { authClient } from '../auth-client';
@@ -18,6 +19,7 @@ import { authClient } from '../auth-client';
     HlmFieldImports,
     HlmCheckboxImports,
     HlmRadioGroupImports,
+    HlmSpinnerImports,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -83,7 +85,12 @@ import { authClient } from '../auth-client';
             </hlm-field-group>
           </div>
           <hlm-field orientation="horizontal">
-            <button hlmBtn type="submit">Subscribe to Newsletter</button>
+            <button hlmBtn type="submit" [disabled]="loading()">
+              @if (loading()) {
+                <hlm-spinner />
+              }
+              Subscribe to Newsletter
+            </button>
           </hlm-field>
         </hlm-field-group>
       </form>
@@ -116,6 +123,8 @@ export class NewsletterMetadata {
     email(schemaPath.email, { message: 'Invalid email address' });
   });
 
+  loading = signal(false);
+
   handleChange(checked: boolean, id: string) {
     const interests = this.model().interests;
 
@@ -133,6 +142,7 @@ export class NewsletterMetadata {
     event.preventDefault();
 
     submit(this.form, async () => {
+      this.loading.set(true);
       const { email, role, interests } = this.model();
 
       const { data, error } = await authClient.lead.subscribe({
@@ -142,6 +152,8 @@ export class NewsletterMetadata {
           interests,
         },
       });
+
+      this.loading.set(false);
 
       if (error) {
         toast.error(error?.message || 'Newsletter subscription failed');

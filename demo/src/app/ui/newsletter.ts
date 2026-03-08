@@ -3,13 +3,14 @@ import { email, form, FormField, required, submit } from '@angular/forms/signals
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { toast } from 'ngx-sonner';
 
 import { authClient } from '../auth-client';
 
 @Component({
   selector: 'ba-newsletter',
-  imports: [FormField, HlmButtonImports, HlmInputImports, HlmFieldImports],
+  imports: [FormField, HlmButtonImports, HlmInputImports, HlmFieldImports, HlmSpinnerImports],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block py-16',
@@ -25,7 +26,12 @@ import { authClient } from '../auth-client';
         <hlm-field>
           <hlm-field orientation="horizontal">
             <input hlmInput type="email" placeholder="Enter your email" [formField]="form.email" />
-            <button hlmBtn type="submit">Subscribe</button>
+            <button hlmBtn type="submit" [disabled]="loading()">
+              @if (loading()) {
+                <hlm-spinner />
+              }
+              Subscribe
+            </button>
           </hlm-field>
           <hlm-field-description class="text-left">
             We care about your data in our privacy policy.
@@ -50,15 +56,20 @@ export class Newsletter {
     email(schemaPath.email, { message: 'Invalid email address' });
   });
 
+  loading = signal(false);
+
   async subscribe(event: Event) {
     event.preventDefault();
 
     submit(this.form, async () => {
+      this.loading.set(true);
       const { email } = this.model();
 
       const { data, error } = await authClient.lead.subscribe({
         email,
       });
+
+      this.loading.set(false);
 
       if (error) {
         toast.error(error?.message || 'Newsletter subscription failed');
