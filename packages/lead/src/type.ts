@@ -18,6 +18,16 @@ export interface LeadOptions {
     request?: Request,
   ) => Promise<void>;
 
+  onEmailVerified?: (
+    /**
+     * @param lead the lead that was verified
+     */
+    data: { lead: Lead },
+    request?: Request,
+  ) => Promise<void>;
+
+  // TODO add hook afterEmailVerified
+
   /**
    * Number of seconds the verification token is
    * valid for.

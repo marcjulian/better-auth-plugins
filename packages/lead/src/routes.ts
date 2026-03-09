@@ -116,7 +116,7 @@ export const verify = <O extends LeadOptions>(options: O) =>
 
       const parsed = subscribeSchema.parse(jwt.payload);
 
-      const lead = await ctx.context.adapter.findOne<Lead>({
+      let lead = await ctx.context.adapter.findOne<Lead>({
         model: 'lead',
         where: [
           {
@@ -138,7 +138,7 @@ export const verify = <O extends LeadOptions>(options: O) =>
         });
       }
 
-      await ctx.context.adapter.update<Lead>({
+      lead = await ctx.context.adapter.update<Lead>({
         model: 'lead',
         where: [
           {
@@ -150,6 +150,16 @@ export const verify = <O extends LeadOptions>(options: O) =>
           emailVerified: true,
         },
       });
+
+      if (!lead) {
+        return ctx.json({
+          status: true,
+        });
+      }
+
+      if (options.onEmailVerified) {
+        await ctx.context.runInBackgroundOrAwait(options.onEmailVerified({ lead }, ctx.request));
+      }
 
       return ctx.json({
         status: true,
