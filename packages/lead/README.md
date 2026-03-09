@@ -131,6 +131,25 @@ export const auth = betterAuth({
 
 > Avoid awaiting the email sending to prevent timing attacks.
 
+### Email Verified
+
+```ts
+// server/auth.ts
+import { betterAuth } from 'better-auth';
+import { lead } from 'better-auth-lead';
+
+export const auth = betterAuth({
+  plugins: [
+    lead({
+      onEmailVerified: async ({ lead }) => {
+        // do something when a lead's email is verified
+        console.log(`Lead ${lead.email} has been verified!`);
+      },
+    }),
+  ],
+});
+```
+
 ## Schema
 
 ### Lead
