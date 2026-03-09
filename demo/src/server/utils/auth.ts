@@ -1,6 +1,7 @@
 import { prismaAdapter } from '@better-auth/prisma-adapter';
 import { lead } from 'better-auth-lead';
 import { betterAuth } from 'better-auth/minimal';
+import * as z from 'zod';
 
 import { prisma } from './db';
 import env from './env';
@@ -19,6 +20,14 @@ export const auth = betterAuth({
       },
       onEmailVerified: async ({ lead }) => {
         console.log({ lead });
+      },
+      metadata: {
+        validationSchema: z
+          .object({
+            role: z.string().optional(),
+            interests: z.array(z.string()).optional(),
+          })
+          .optional(),
       },
     }),
   ],

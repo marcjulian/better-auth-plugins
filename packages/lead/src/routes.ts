@@ -1,3 +1,4 @@
+import { BASE_ERROR_CODES, type InternalLogger } from 'better-auth';
 import { APIError, createAuthEndpoint, createEmailVerificationToken } from 'better-auth/api';
 import { jwtVerify } from 'jose';
 import type { JWTPayload, JWTVerifyResult } from 'jose';
@@ -24,12 +25,14 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
       body: subscribeSchema,
     },
     async (ctx) => {
-      const { email, metadata } = ctx.body;
+      const { email } = ctx.body;
 
       const isValidEmail = z.email().safeParse(email);
       if (!isValidEmail.success) {
         throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.INVALID_EMAIL);
       }
+
+      const metadata = validateMetadata(options, ctx.body.metadata, ctx.context.logger);
 
       const normalizedEmail = email.toLowerCase();
 
@@ -291,7 +294,7 @@ export const update = <O extends LeadOptions>(options: O) =>
       body: updateSchema,
     },
     async (ctx) => {
-      const { id, metadata } = ctx.body;
+      const { id } = ctx.body;
 
       const lead = await ctx.context.adapter.findOne<Lead>({
         model: 'lead',
@@ -308,6 +311,8 @@ export const update = <O extends LeadOptions>(options: O) =>
           status: true,
         });
       }
+
+      const metadata = validateMetadata(options, ctx.body.metadata, ctx.context.logger);
 
       await ctx.context.adapter.update<Lead>({
         model: 'lead',
@@ -327,3 +332,25 @@ export const update = <O extends LeadOptions>(options: O) =>
       });
     },
   );
+
+function validateMetadata(
+  options: LeadOptions,
+  metadata: Record<string, any> | undefined,
+  logger: InternalLogger,
+) {
+  if (!metadata || !options.metadata?.validationSchema) {
+    return metadata;
+  }
+  const validationResult = options.metadata.validationSchema['~standard'].validate(metadata);
+
+  if (validationResult instanceof Promise) {
+    throw APIError.from('INTERNAL_SERVER_ERROR', BASE_ERROR_CODES.ASYNC_VALIDATION_NOT_SUPPORTED);
+  }
+
+  if (validationResult.issues) {
+    logger.error('Invalid metadata', validationResult.issues);
+    throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.INVALID_METADATA);
+  }
+
+  return validationResult.value as Record<string, any>;
+}

@@ -1,4 +1,4 @@
-import type { InferOptionSchema } from 'better-auth';
+import type { InferOptionSchema, StandardSchemaV1 } from 'better-auth';
 
 import type { lead } from './schema';
 
@@ -55,6 +55,10 @@ export interface LeadOptions {
    * Schema for the lead plugin
    */
   schema?: InferOptionSchema<typeof lead> | undefined;
+
+  metadata?: {
+    validationSchema?: StandardSchemaV1;
+  };
 }
 
 export interface Lead {

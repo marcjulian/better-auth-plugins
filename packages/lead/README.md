@@ -108,6 +108,14 @@ const { data, error } = await authClient.lead.update({
 
 ### Email Verification
 
+To enable email verification, you need to pass a function that sends a verification email with a link. The `sendVerificationEmail` takes a data object with the following properties:
+
+- `email`: The lead email.
+- `url`: The URL to send to the user which contains the token.
+- `token`: A verification token used to complete the email verification.
+
+and a `request` object as the second parameter.
+
 ```ts
 // server/auth.ts
 import { betterAuth } from 'better-auth';
@@ -124,23 +132,6 @@ export const auth = betterAuth({
           text: `Click the link to verify your email: ${url}`,
         });
       },
-    }),
-  ],
-});
-```
-
-> Avoid awaiting the email sending to prevent timing attacks.
-
-### Email Verified
-
-```ts
-// server/auth.ts
-import { betterAuth } from 'better-auth';
-import { lead } from 'better-auth-lead';
-
-export const auth = betterAuth({
-  plugins: [
-    lead({
       onEmailVerified: async ({ lead }) => {
         // do something when a lead's email is verified
         console.log(`Lead ${lead.email} has been verified!`);
@@ -149,6 +140,37 @@ export const auth = betterAuth({
   ],
 });
 ```
+
+> Avoid awaiting the email sending to prevent timing attacks.
+
+Additionally, you can provide an `onEmailVerified` callback to execute logic after a lead's email is verified.
+
+### Metadata Validation
+
+To validate and parse metadata, you can pass a Standard Schema compatible schema (e.g. Zod, Valibot, ArkType).
+
+```ts
+// server/auth.ts
+import { betterAuth } from 'better-auth';
+import { lead } from 'better-auth-lead';
+import * as z from 'zod';
+
+const metadataSchema = z.object({
+  preferences: z.enum(['engineering', 'marketing', 'design']),
+});
+
+export const auth = betterAuth({
+  plugins: [
+    lead({
+      metadata: {
+        validationSchema: metadataSchema,
+      },
+    }),
+  ],
+});
+```
+
+If the schema validation fails, the API `subscribe` and `update` routes will return a `400 Bad Request` error with `INVALID_METADATA`.
 
 ## Schema
 
