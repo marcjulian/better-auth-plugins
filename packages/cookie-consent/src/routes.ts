@@ -1,3 +1,4 @@
+import { BASE_ERROR_CODES, type InternalLogger } from 'better-auth';
 import { APIError, createAuthEndpoint } from 'better-auth/api';
 import * as z from 'zod';
 
@@ -46,12 +47,14 @@ export const setConsent = <O extends CookieConsentOptions>(options: O) =>
         throw APIError.from('BAD_REQUEST', COOKIE_CONSENT_ERROR_CODES.INVALID_CONSENT);
       }
 
+      const validatedConsent = validateConsent(options, consent, ctx.context.logger);
+
       const userId = ctx.context.session?.user?.id ?? null;
 
       // Look for existing record by userId or anonymousId
       const existing = await findConsentRecord(ctx, userId, anonymousId);
 
-      const consentJson = JSON.stringify(consent);
+      const consentJson = JSON.stringify(validatedConsent);
       const now = new Date();
 
       if (existing) {
@@ -234,4 +237,30 @@ async function findConsentRecord(
   }
 
   return null;
+}
+
+/**
+ * Validate the consent object against the configured validation schema.
+ * Returns the validated consent or the original consent when no schema is set.
+ */
+function validateConsent(
+  options: CookieConsentOptions,
+  consent: Record<string, boolean>,
+  logger: InternalLogger,
+): Record<string, boolean> {
+  if (!options.consent?.validationSchema) {
+    return consent;
+  }
+  const validationResult = options.consent.validationSchema['~standard'].validate(consent);
+
+  if (validationResult instanceof Promise) {
+    throw APIError.from('INTERNAL_SERVER_ERROR', BASE_ERROR_CODES.ASYNC_VALIDATION_NOT_SUPPORTED);
+  }
+
+  if (validationResult.issues) {
+    logger.error('Invalid consent', validationResult.issues);
+    throw APIError.from('BAD_REQUEST', COOKIE_CONSENT_ERROR_CODES.INVALID_CONSENT);
+  }
+
+  return validationResult.value as Record<string, boolean>;
 }

@@ -1,10 +1,31 @@
 import type { BetterAuthPlugin } from 'better-auth';
 import { createAuthMiddleware } from 'better-auth/api';
+import * as z from 'zod';
 
 import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
 import { getConsent, mergeConsent, setConsent } from './routes';
 import { getSchema } from './schema';
 import type { Consent, CookieConsentOptions, CookieConsentRecord } from './type';
+
+/**
+ * Preset validation schema for cookie consent.
+ * Validates the standard consent categories: necessary, analytics, marketing, functional.
+ * Use this with `consent.validationSchema` in the plugin options.
+ *
+ * @example
+ * ```ts
+ * cookieConsentPlugin({
+ *   consentVersion: 'v1',
+ *   consent: { validationSchema: defaultConsentSchema },
+ * })
+ * ```
+ */
+export const defaultConsentSchema = z.object({
+  necessary: z.boolean(),
+  analytics: z.boolean(),
+  marketing: z.boolean(),
+  functional: z.boolean(),
+});
 
 export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O = {} as O) => {
   return {

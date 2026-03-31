@@ -157,6 +157,16 @@ function getOrCreateAnonymousId(): string {
           </div>
         </div>
       </div>
+    } @else if (consentRecorded()) {
+      <button
+        hlmBtn
+        variant="outline"
+        size="sm"
+        class="fixed bottom-4 left-4 z-50 shadow-md"
+        (click)="reopenBanner()"
+      >
+        🍪 Manage Cookies
+      </button>
     }
   `,
 })
@@ -165,6 +175,7 @@ export class CookieBanner {
   readonly visible = signal(false);
   readonly showDetails = signal(false);
   readonly loading = signal(false);
+  readonly consentRecorded = signal(false);
 
   readonly consent = signal<Record<string, boolean>>({
     necessary: true,
@@ -179,6 +190,11 @@ export class CookieBanner {
     if (typeof window !== 'undefined') {
       this.loadConsent();
     }
+  }
+
+  reopenBanner() {
+    this.showDetails.set(false);
+    this.visible.set(true);
   }
 
   toggleCategory(id: string, checked: boolean) {
@@ -202,6 +218,7 @@ export class CookieBanner {
     } else {
       toast.success('All cookies accepted');
       this.visible.set(false);
+      this.consentRecorded.set(true);
     }
   }
 
@@ -209,23 +226,17 @@ export class CookieBanner {
     this.loading.set(true);
     const anonymousId = getOrCreateAnonymousId();
 
-    // Keep 'necessary' always enabled
-    const categories = this.categoryIds().filter((id) => id !== 'necessary');
+    // Reject all: necessary stays true, everything else false
+    const consent: Record<string, boolean> = {};
+    for (const cat of this.categories) {
+      consent[cat.id] = cat.locked; // true for necessary, false for the rest
+    }
 
-    const { error } = await authClient.cookieConsent.rejectAll({
+    const { error } = await authClient.cookieConsent.setConsent({
       anonymousId,
-      categories,
+      consent,
       consentVersion: CONSENT_VERSION,
     });
-
-    // Necessary cookies are always on - save that
-    if (!error) {
-      await authClient.cookieConsent.setConsent({
-        anonymousId,
-        consent: { necessary: true },
-        consentVersion: CONSENT_VERSION,
-      });
-    }
 
     this.loading.set(false);
 
@@ -233,7 +244,9 @@ export class CookieBanner {
       toast.error('Failed to save cookie preferences');
     } else {
       toast.success('Non-essential cookies rejected');
+      this.consent.set(consent);
       this.visible.set(false);
+      this.consentRecorded.set(true);
     }
   }
 
@@ -254,6 +267,7 @@ export class CookieBanner {
     } else {
       toast.success('Cookie preferences saved');
       this.visible.set(false);
+      this.consentRecorded.set(true);
     }
   }
 
@@ -269,6 +283,7 @@ export class CookieBanner {
       // Consent is current — apply stored values
       this.consent.set(data.consent.consent);
       this.visible.set(false);
+      this.consentRecorded.set(true);
     }
   }
 }

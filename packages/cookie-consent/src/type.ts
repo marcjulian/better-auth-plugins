@@ -1,4 +1,4 @@
-import type { InferOptionSchema } from 'better-auth';
+import type { InferOptionSchema, StandardSchemaV1 } from 'better-auth';
 
 import type { cookieConsent } from './schema';
 
@@ -49,6 +49,18 @@ export interface CookieConsentOptions {
    * Schema overrides for the cookie consent table.
    */
   schema?: InferOptionSchema<typeof cookieConsent> | undefined;
+
+  /**
+   * Consent validation configuration.
+   */
+  consent?: {
+    /**
+     * A Standard Schema (e.g. Zod) used to validate the consent
+     * object on every `setConsent` call. When omitted, the
+     * consent object is accepted as-is (any `Record<string, boolean>`).
+     */
+    validationSchema?: StandardSchemaV1;
+  };
 }
 
 /**
