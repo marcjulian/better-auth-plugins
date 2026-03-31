@@ -113,6 +113,8 @@ To enable email verification, you need to pass a function that sends a verificat
 - `email`: The lead email.
 - `url`: The URL to send to the user which contains the token.
 - `token`: A verification token used to complete the email verification.
+- `createdAt`: The timestamp when the lead was created.
+- `isNewLead`: whether the lead was newly created or already existed - useful to bounce verification emails together with `createdAt`
 
 and a `request` object as the second parameter.
 

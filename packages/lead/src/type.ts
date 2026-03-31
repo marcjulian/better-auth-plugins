@@ -13,8 +13,10 @@ export interface LeadOptions {
      * @param email the email to send the verification email to
      * @param url the verification url
      * @param token the verification token
+     * @param createdAt the date the lead was created
+     * @param isNewLead whether the lead was newly created or already existed - useful to bounce verification emails together with `createdAt`
      */
-    data: { email: string; url: string; token: string },
+    data: { email: string; url: string; token: string; createdAt: Date; isNewLead: boolean },
     request?: Request,
   ) => Promise<void>;
 

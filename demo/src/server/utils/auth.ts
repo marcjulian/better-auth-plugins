@@ -15,8 +15,8 @@ export const auth = betterAuth({
   },
   plugins: [
     lead({
-      sendVerificationEmail: async ({ email, url, token }) => {
-        console.log({ email, url, token });
+      sendVerificationEmail: async ({ email, url, token, createdAt, isNewLead }) => {
+        console.log({ email, url, token, createdAt, isNewLead });
       },
       onEmailVerified: async ({ lead }) => {
         console.log({ lead });
