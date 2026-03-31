@@ -191,25 +191,27 @@ If the schema validation fails, the API `subscribe` and `update` routes will ret
 
 Table name: `lead`
 
-|  Field         |  Type   |  Key   |  Description                    |
-| -------------- | ------- | ------ | ------------------------------- |
-| id             | string  | pk     | Unique identifier for each lead |
-| email          | string  | unique | Email address of the lead       |
-|  emailVerified | boolean |        | Whether the email is verified   |
-| metadata       | json    | ?      | Additional data about the lead  |
-| createdAt      | date    |        | Timestamp of lead creation      |
-| updatedAt      | date    |        | Timestamp of last update        |
+|  Field                  |  Type   |  Key   |  Description                                      |
+| ----------------------- | ------- | ------ | ------------------------------------------------- |
+| id                      | string  | pk     | Unique identifier for each lead                   |
+| email                   | string  | unique | Email address of the lead                         |
+| emailVerified           | boolean |        | Whether the email is verified                     |
+| verificationEmailSentAt | Date    | ?      | Timestamp of when the verification email was sent |
+| metadata                | json    | ?      | Additional data about the lead                    |
+| createdAt               | date    |        | Timestamp of lead creation                        |
+| updatedAt               | date    |        | Timestamp of last update                          |
 
 #### Prisma
 
 ```prisma
 model Lead {
-  id            String   @id
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  email         String
-  emailVerified Boolean  @default(false)
-  metadata      String?
+  id                      String    @id
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  email                   String
+  emailVerified           Boolean   @default(false)
+  verificationEmailSentAt DateTime?
+  metadata                String?
 
   @@unique([email])
   @@map("lead")
