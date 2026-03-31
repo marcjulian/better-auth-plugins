@@ -34,7 +34,11 @@ export const cookieConsentClient = () => {
       >;
 
       async function syncFromServer(anonymousId?: string) {
-        const query = anonymousId ? `?anonymousId=${encodeURIComponent(anonymousId)}` : '';
+        let path = '/cookie-consent/get';
+        if (anonymousId) {
+          const params = new URLSearchParams({ anonymousId });
+          path = `${path}?${params.toString()}`;
+        }
         const res = await $fetch<{
           consent: {
             id: string;
@@ -45,7 +49,7 @@ export const cookieConsentClient = () => {
             timestamp: string;
           } | null;
           versionMatch: boolean;
-        }>(`/cookie-consent/get${query}`, { method: 'GET' });
+        }>(`${path}`, { method: 'GET' });
         if (res.data) {
           consentAtom.set({
             consent: res.data.consent?.consent ?? null,

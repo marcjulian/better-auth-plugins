@@ -148,7 +148,7 @@ export const mergeConsent = <O extends CookieConsentOptions>(_options: O) =>
       const userId = ctx.context.session?.user?.id;
 
       if (!userId) {
-        throw APIError.from('UNAUTHORIZED', COOKIE_CONSENT_ERROR_CODES.CONSENT_NOT_FOUND);
+        throw APIError.from('UNAUTHORIZED', COOKIE_CONSENT_ERROR_CODES.AUTHENTICATION_REQUIRED);
       }
 
       const { anonymousId } = ctx.body;
@@ -170,14 +170,13 @@ export const mergeConsent = <O extends CookieConsentOptions>(_options: O) =>
       });
 
       if (userRecord) {
-        // User already has consent; update anonymous record to point to user
+        // User already has consent; update with latest anonymous consent data
         await ctx.context.adapter.update<CookieConsentRecord>({
           model: 'cookieConsent',
           where: [{ field: 'id', value: userRecord.id }],
           update: {
             consent: anonymousRecord.consent,
             consentVersion: anonymousRecord.consentVersion,
-            anonymousId,
             timestamp: new Date(),
           },
         });

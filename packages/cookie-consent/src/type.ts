@@ -35,7 +35,7 @@ export interface CookieConsentOptions {
   rateLimit?: {
     /**
      * Time window in seconds for which the rate limit applies.
-     * @default 10 seconds
+     * @default 10
      */
     window: number;
     /**
