@@ -263,19 +263,19 @@ export class CookieBanner {
 
   private async loadConsent() {
     const anonId = this.anonymousId.get();
-    if (!anonId) {
-      this.visible.set(true);
-      return;
-    }
 
-    const { data } = await authClient.cookieConsent.getConsent(anonId);
+    // Always try fetching from server — it checks the authenticated session
+    // (userId) first, then falls back to anonymousId. This ensures that a
+    // signed-in user whose consent is stored on their account won't see the
+    // banner even when the anonymous cookie is absent.
+    const { data, error } = await authClient.cookieConsent.getConsent(anonId ?? undefined);
 
-    if (!data?.consent || !data.versionMatch) {
-      this.visible.set(true);
-    } else {
+    if (!error && data?.consent && data.versionMatch) {
       this.consent.set(data.consent.consent);
       this.visible.set(false);
       this.consentRecorded.set(true);
+    } else {
+      this.visible.set(true);
     }
   }
 }
