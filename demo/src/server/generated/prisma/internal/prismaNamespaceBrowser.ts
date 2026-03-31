@@ -55,7 +55,8 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
-  Lead: 'Lead'
+  Lead: 'Lead',
+  CookieConsent: 'CookieConsent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -142,6 +143,18 @@ export const LeadScalarFieldEnum = {
 } as const
 
 export type LeadScalarFieldEnum = (typeof LeadScalarFieldEnum)[keyof typeof LeadScalarFieldEnum]
+
+
+export const CookieConsentScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  anonymousId: 'anonymousId',
+  consent: 'consent',
+  consentVersion: 'consentVersion',
+  timestamp: 'timestamp'
+} as const
+
+export type CookieConsentScalarFieldEnum = (typeof CookieConsentScalarFieldEnum)[keyof typeof CookieConsentScalarFieldEnum]
 
 
 export const SortOrder = {
