@@ -1,5 +1,5 @@
 import { BASE_ERROR_CODES, type InternalLogger } from 'better-auth';
-import { APIError, createAuthEndpoint } from 'better-auth/api';
+import { APIError, createAuthEndpoint, getSessionFromCtx } from 'better-auth/api';
 import * as z from 'zod';
 
 import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
@@ -49,7 +49,8 @@ export const setConsent = <O extends CookieConsentOptions>(options: O) =>
 
       const validatedConsent = validateConsent(options, consent, ctx.context.logger);
 
-      const userId = ctx.context.session?.user?.id ?? null;
+      const session = await getSessionFromCtx(ctx);
+      const userId = session?.user?.id ?? null;
 
       // Look for existing record by userId or anonymousId
       const existing = await findConsentRecord(ctx, userId, anonymousId);
@@ -110,7 +111,8 @@ export const getConsent = <O extends CookieConsentOptions>(options: O) =>
       query: getConsentSchema,
     },
     async (ctx) => {
-      const userId = ctx.context.session?.user?.id ?? null;
+      const session = await getSessionFromCtx(ctx);
+      const userId = session?.user?.id ?? null;
       const anonymousId = ctx.query?.anonymousId;
 
       if (!userId && !anonymousId) {
@@ -148,7 +150,8 @@ export const mergeConsent = <O extends CookieConsentOptions>(_options: O) =>
       body: mergeConsentSchema,
     },
     async (ctx) => {
-      const userId = ctx.context.session?.user?.id;
+      const session = await getSessionFromCtx(ctx);
+      const userId = session?.user?.id;
 
       if (!userId) {
         throw APIError.from('UNAUTHORIZED', COOKIE_CONSENT_ERROR_CODES.AUTHENTICATION_REQUIRED);
