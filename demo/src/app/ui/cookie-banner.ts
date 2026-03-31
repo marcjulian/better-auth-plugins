@@ -7,9 +7,9 @@ import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { toast } from 'ngx-sonner';
 
 import { authClient } from '../auth-client';
+import { injectAnonymousId } from './cookie-utils';
 
 const CONSENT_VERSION = 'v1';
-const ANONYMOUS_ID_KEY = 'cookie-consent-anon-id';
 
 const CATEGORIES = [
   {
@@ -37,18 +37,6 @@ const CATEGORIES = [
     locked: false,
   },
 ];
-
-function getOrCreateAnonymousId(): string {
-  if (typeof window === 'undefined') return 'ssr';
-  let id = localStorage.getItem(ANONYMOUS_ID_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(ANONYMOUS_ID_KEY, id);
-  }
-  // Always sync as a cookie so the server can read it during sign-in
-  document.cookie = `${ANONYMOUS_ID_KEY}=${encodeURIComponent(id)}; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`;
-  return id;
-}
 
 @Component({
   selector: 'ba-cookie-banner',
@@ -173,6 +161,8 @@ function getOrCreateAnonymousId(): string {
   `,
 })
 export class CookieBanner {
+  private readonly anonymousId = injectAnonymousId();
+
   readonly categories = CATEGORIES;
   readonly visible = signal(false);
   readonly showDetails = signal(false);
@@ -189,9 +179,7 @@ export class CookieBanner {
   readonly categoryIds = computed(() => this.categories.map((c) => c.id));
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      this.loadConsent();
-    }
+    this.loadConsent();
   }
 
   reopenBanner() {
@@ -205,10 +193,10 @@ export class CookieBanner {
 
   async acceptAll() {
     this.loading.set(true);
-    const anonymousId = getOrCreateAnonymousId();
+    const anonId = this.anonymousId.getOrCreate();
 
     const { error } = await authClient.cookieConsent.acceptAll({
-      anonymousId,
+      anonymousId: anonId,
       categories: this.categoryIds(),
       consentVersion: CONSENT_VERSION,
     });
@@ -226,7 +214,7 @@ export class CookieBanner {
 
   async rejectAll() {
     this.loading.set(true);
-    const anonymousId = getOrCreateAnonymousId();
+    const anonId = this.anonymousId.getOrCreate();
 
     // Reject all: necessary stays true, everything else false
     const consent: Record<string, boolean> = {};
@@ -235,7 +223,7 @@ export class CookieBanner {
     }
 
     const { error } = await authClient.cookieConsent.setConsent({
-      anonymousId,
+      anonymousId: anonId,
       consent,
       consentVersion: CONSENT_VERSION,
     });
@@ -254,10 +242,10 @@ export class CookieBanner {
 
   async savePreferences() {
     this.loading.set(true);
-    const anonymousId = getOrCreateAnonymousId();
+    const anonId = this.anonymousId.getOrCreate();
 
     const { error } = await authClient.cookieConsent.updatePreferences({
-      anonymousId,
+      anonymousId: anonId,
       consent: { ...this.consent(), necessary: true },
       consentVersion: CONSENT_VERSION,
     });
@@ -274,15 +262,17 @@ export class CookieBanner {
   }
 
   private async loadConsent() {
-    const anonymousId = getOrCreateAnonymousId();
+    const anonId = this.anonymousId.get();
+    if (!anonId) {
+      this.visible.set(true);
+      return;
+    }
 
-    const { data } = await authClient.cookieConsent.getConsent(anonymousId);
+    const { data } = await authClient.cookieConsent.getConsent(anonId);
 
     if (!data?.consent || !data.versionMatch) {
-      // No consent stored or version mismatch — show banner
       this.visible.set(true);
     } else {
-      // Consent is current — apply stored values
       this.consent.set(data.consent.consent);
       this.visible.set(false);
       this.consentRecorded.set(true);

@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, OnDestroy, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
+import { email, form, FormField, minLength, required, submit } from '@angular/forms/signals';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
@@ -7,15 +9,14 @@ import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { toast } from 'ngx-sonner';
 
 import { authClient } from '../auth-client';
-
-const ANONYMOUS_ID_KEY = 'cookie-consent-anon-id';
-const MIN_PASSWORD_LENGTH = 8;
+import { injectAnonymousId } from './cookie-utils';
 
 type AuthMode = 'sign-in' | 'sign-up';
 
 @Component({
   selector: 'ba-auth-panel',
   imports: [
+    FormField,
     HlmButtonImports,
     HlmInputImports,
     HlmFieldImports,
@@ -57,80 +58,101 @@ type AuthMode = 'sign-in' | 'sign-up';
           </button>
         </div>
       } @else {
-        <form class="space-y-4" (submit)="onSubmit($event)">
-          @if (mode() === 'sign-up') {
+        @if (mode() === 'sign-up') {
+          <form class="space-y-4" (submit)="onSignUp($event)">
             <hlm-field>
               <label hlmFieldLabel for="auth-name">Name</label>
-              <input
-                hlmInput
-                id="auth-name"
-                type="text"
-                placeholder="Your name"
-                class="w-full"
-                [value]="name()"
-                (input)="name.set($any($event.target).value)"
-              />
+              <input hlmInput id="auth-name" type="text" placeholder="Your name" class="w-full" [formField]="signUpForm.name" />
+              @if (signUpForm.name().touched() && signUpForm.name().invalid()) {
+                @for (error of signUpForm.name().errors(); track error) {
+                  <hlm-field-error>{{ error.message }}</hlm-field-error>
+                }
+              }
             </hlm-field>
-          }
 
-          <hlm-field>
-            <label hlmFieldLabel for="auth-email">Email</label>
-            <input
-              hlmInput
-              id="auth-email"
-              type="email"
-              placeholder="you&#64;example.com"
-              class="w-full"
-              [value]="email()"
-              (input)="email.set($any($event.target).value)"
-            />
-          </hlm-field>
+            <hlm-field>
+              <label hlmFieldLabel for="auth-email-up">Email</label>
+              <input hlmInput id="auth-email-up" type="email" placeholder="you&#64;example.com" class="w-full" [formField]="signUpForm.email" />
+              @if (signUpForm.email().touched() && signUpForm.email().invalid()) {
+                @for (error of signUpForm.email().errors(); track error) {
+                  <hlm-field-error>{{ error.message }}</hlm-field-error>
+                }
+              }
+            </hlm-field>
 
-          <hlm-field>
-            <label hlmFieldLabel for="auth-password">Password</label>
-            <input
-              hlmInput
-              id="auth-password"
-              type="password"
-              placeholder="••••••••"
-              class="w-full"
-              [value]="password()"
-              (input)="password.set($any($event.target).value)"
-            />
-          </hlm-field>
+            <hlm-field>
+              <label hlmFieldLabel for="auth-password-up">Password</label>
+              <input hlmInput id="auth-password-up" type="password" placeholder="••••••••" class="w-full" [formField]="signUpForm.password" />
+              @if (signUpForm.password().touched() && signUpForm.password().invalid()) {
+                @for (error of signUpForm.password().errors(); track error) {
+                  <hlm-field-error>{{ error.message }}</hlm-field-error>
+                }
+              }
+            </hlm-field>
 
-          <button hlmBtn type="submit" class="w-full" [disabled]="loading()">
-            @if (submitting()) {
-              <hlm-spinner />
-            }
-            {{ mode() === 'sign-in' ? 'Sign In' : 'Sign Up' }}
-          </button>
+            <button hlmBtn type="submit" class="w-full" [disabled]="loading()">
+              @if (submitting()) {
+                <hlm-spinner />
+              }
+              Sign Up
+            </button>
 
-          <brn-separator hlmSeparator />
+            <brn-separator hlmSeparator />
 
-          <p class="text-center text-sm text-muted-foreground">
-            @if (mode() === 'sign-in') {
-              Don't have an account?
-              <button hlmBtn variant="link" size="sm" type="button" (click)="toggleMode()">Sign Up</button>
-            } @else {
+            <p class="text-center text-sm text-muted-foreground">
               Already have an account?
               <button hlmBtn variant="link" size="sm" type="button" (click)="toggleMode()">Sign In</button>
-            }
-          </p>
-        </form>
+            </p>
+          </form>
+        } @else {
+          <form class="space-y-4" (submit)="onSignIn($event)">
+            <hlm-field>
+              <label hlmFieldLabel for="auth-email-in">Email</label>
+              <input hlmInput id="auth-email-in" type="email" placeholder="you&#64;example.com" class="w-full" [formField]="signInForm.email" />
+              @if (signInForm.email().touched() && signInForm.email().invalid()) {
+                @for (error of signInForm.email().errors(); track error) {
+                  <hlm-field-error>{{ error.message }}</hlm-field-error>
+                }
+              }
+            </hlm-field>
+
+            <hlm-field>
+              <label hlmFieldLabel for="auth-password-in">Password</label>
+              <input hlmInput id="auth-password-in" type="password" placeholder="••••••••" class="w-full" [formField]="signInForm.password" />
+              @if (signInForm.password().touched() && signInForm.password().invalid()) {
+                @for (error of signInForm.password().errors(); track error) {
+                  <hlm-field-error>{{ error.message }}</hlm-field-error>
+                }
+              }
+            </hlm-field>
+
+            <button hlmBtn type="submit" class="w-full" [disabled]="loading()">
+              @if (submitting()) {
+                <hlm-spinner />
+              }
+              Sign In
+            </button>
+
+            <brn-separator hlmSeparator />
+
+            <p class="text-center text-sm text-muted-foreground">
+              Don't have an account?
+              <button hlmBtn variant="link" size="sm" type="button" (click)="toggleMode()">Sign Up</button>
+            </p>
+          </form>
+        }
       }
     </div>
   `,
 })
 export class AuthPanel implements OnDestroy {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly anonymousId = injectAnonymousId();
+
   readonly mode = signal<AuthMode>('sign-in');
-  readonly name = signal('');
-  readonly email = signal('');
-  readonly password = signal('');
   readonly submitting = signal(false);
   readonly signingOut = signal(false);
   readonly merging = signal(false);
-
   readonly loading = computed(() => this.submitting() || this.signingOut() || this.merging());
 
   private readonly session = signal<{ user: { name: string; email: string } } | null>(null);
@@ -138,12 +160,30 @@ export class AuthPanel implements OnDestroy {
   readonly userName = computed(() => this.session()?.user?.name ?? '');
   readonly userEmail = computed(() => this.session()?.user?.email ?? '');
 
+  // ─── Sign-in form ───
+  signInModel = signal({ email: '', password: '' });
+  signInForm = form(this.signInModel, (s) => {
+    required(s.email, { message: 'Email is required' });
+    email(s.email, { message: 'Invalid email address' });
+    required(s.password, { message: 'Password is required' });
+  });
+
+  // ─── Sign-up form ───
+  signUpModel = signal({ name: '', email: '', password: '' });
+  signUpForm = form(this.signUpModel, (s) => {
+    required(s.name, { message: 'Name is required' });
+    required(s.email, { message: 'Email is required' });
+    email(s.email, { message: 'Invalid email address' });
+    required(s.password, { message: 'Password is required' });
+    minLength(s.password, 8, { message: 'Password must be at least 8 characters' });
+  });
+
   private unsubscribeSession?: () => void;
 
   constructor() {
     this.loadSession();
 
-    if (typeof window !== 'undefined') {
+    if (isPlatformBrowser(this.platformId)) {
       this.unsubscribeSession = authClient.useSession.subscribe((val) => {
         if (val.data) {
           this.session.set(val.data as { user: { name: string; email: string } });
@@ -162,74 +202,44 @@ export class AuthPanel implements OnDestroy {
     this.mode.update((m) => (m === 'sign-in' ? 'sign-up' : 'sign-in'));
   }
 
-  async onSubmit(event: Event) {
+  async onSignIn(event: Event) {
     event.preventDefault();
-    if (this.mode() === 'sign-in') {
-      await this.signIn();
-    } else {
-      await this.signUp();
-    }
+    submit(this.signInForm, async () => {
+      this.submitting.set(true);
+      const { email, password } = this.signInModel();
+
+      const { data, error } = await authClient.signIn.email({ email, password });
+
+      this.submitting.set(false);
+
+      if (error) {
+        toast.error(error?.message || 'Sign in failed');
+      } else if (data) {
+        this.session.set(data as { user: { name: string; email: string } });
+        toast.success('Signed in successfully!');
+        this.signInModel.set({ email: '', password: '' });
+      }
+    });
   }
 
-  async signIn() {
-    const emailVal = this.email().trim();
-    const passwordVal = this.password();
+  async onSignUp(event: Event) {
+    event.preventDefault();
+    submit(this.signUpForm, async () => {
+      this.submitting.set(true);
+      const { name, email, password } = this.signUpModel();
 
-    if (!emailVal || !passwordVal) {
-      toast.error('Please fill in all fields');
-      return;
-    }
+      const { data, error } = await authClient.signUp.email({ name, email, password });
 
-    this.submitting.set(true);
+      this.submitting.set(false);
 
-    const { data, error } = await authClient.signIn.email({
-      email: emailVal,
-      password: passwordVal,
+      if (error) {
+        toast.error(error?.message || 'Sign up failed');
+      } else if (data) {
+        this.session.set(data as { user: { name: string; email: string } });
+        toast.success('Account created successfully!');
+        this.signUpModel.set({ name: '', email: '', password: '' });
+      }
     });
-
-    this.submitting.set(false);
-
-    if (error) {
-      toast.error(error?.message || 'Sign in failed');
-    } else if (data) {
-      this.session.set(data as { user: { name: string; email: string } });
-      toast.success('Signed in successfully!');
-      this.resetForm();
-    }
-  }
-
-  async signUp() {
-    const nameVal = this.name().trim();
-    const emailVal = this.email().trim();
-    const passwordVal = this.password();
-
-    if (!nameVal || !emailVal || !passwordVal) {
-      toast.error('Please fill in all fields');
-      return;
-    }
-
-    if (passwordVal.length < MIN_PASSWORD_LENGTH) {
-      toast.error(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
-      return;
-    }
-
-    this.submitting.set(true);
-
-    const { data, error } = await authClient.signUp.email({
-      name: nameVal,
-      email: emailVal,
-      password: passwordVal,
-    });
-
-    this.submitting.set(false);
-
-    if (error) {
-      toast.error(error?.message || 'Sign up failed');
-    } else if (data) {
-      this.session.set(data as { user: { name: string; email: string } });
-      toast.success('Account created successfully!');
-      this.resetForm();
-    }
   }
 
   async signOut() {
@@ -248,15 +258,15 @@ export class AuthPanel implements OnDestroy {
   }
 
   async mergeConsent() {
-    const anonymousId = this.getAnonymousId();
-    if (!anonymousId) {
+    const anonId = this.anonymousId.get();
+    if (!anonId) {
       toast.error('No anonymous consent to merge');
       return;
     }
 
     this.merging.set(true);
 
-    const { data, error } = await authClient.cookieConsent.mergeConsent(anonymousId);
+    const { data, error } = await authClient.cookieConsent.mergeConsent(anonId);
 
     this.merging.set(false);
 
@@ -269,19 +279,8 @@ export class AuthPanel implements OnDestroy {
     }
   }
 
-  private getAnonymousId(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem(ANONYMOUS_ID_KEY);
-  }
-
-  private resetForm() {
-    this.name.set('');
-    this.email.set('');
-    this.password.set('');
-  }
-
   private async loadSession() {
-    if (typeof window === 'undefined') return;
+    if (!isPlatformBrowser(this.platformId)) return;
 
     try {
       const { data } = await authClient.getSession();
