@@ -30,6 +30,11 @@ export const lead = {
         required: true,
         input: false,
       },
+      verificationEmailSentAt: {
+        type: 'date',
+        required: false,
+        input: false,
+      },
       metadata: {
         type: 'string',
         required: false,

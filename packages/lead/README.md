@@ -110,11 +110,9 @@ const { data, error } = await authClient.lead.update({
 
 To enable email verification, you need to pass a function that sends a verification email with a link. The `sendVerificationEmail` takes a data object with the following properties:
 
-- `email`: The lead email.
+- `lead`: The lead object.
 - `url`: The URL to send to the user which contains the token.
 - `token`: A verification token used to complete the email verification.
-- `createdAt`: The timestamp when the lead was created.
-- `isNewLead`: whether the lead was newly created or already existed - useful to bounce verification emails together with `createdAt`
 
 and a `request` object as the second parameter.
 
@@ -127,12 +125,25 @@ import { sendEmail } from './email'; // your email sending function
 export const auth = betterAuth({
   plugins: [
     lead({
-      sendVerificationEmail: async ({ email, url, token }) => {
+      sendVerificationEmail: async ({ lead, url, token }) => {
+        const { verificationEmailSentAt } = lead;
+        if (
+          verificationEmailSentAt &&
+          Date.now() - verificationEmailSentAt.getTime() < 60 * 1000 // 1 minute
+        ) {
+          console.log(
+            `Skipping sending verification email to ${lead.email} because a recent email was already sent.`,
+          );
+          return false;
+        }
+
         void sendEmail({
-          to: email,
+          to: lead.email,
           subject: 'Newsletter: Verify your email address',
           text: `Click the link to verify your email: ${url}`,
         });
+
+        return true;
       },
       onEmailVerified: async ({ lead }) => {
         // do something when a lead's email is verified

@@ -10,15 +10,13 @@ export interface LeadOptions {
    */
   sendVerificationEmail?: (
     /**
-     * @param email the email to send the verification email to
+     * @param lead the lead to send the verification email to
      * @param url the verification url
      * @param token the verification token
-     * @param createdAt the date the lead was created
-     * @param isNewLead whether the lead was newly created or already existed - useful to bounce verification emails together with `createdAt`
      */
-    data: { email: string; url: string; token: string; createdAt: Date; isNewLead: boolean },
+    data: { lead: Lead; url: string; token: string },
     request?: Request,
-  ) => Promise<void>;
+  ) => Promise<boolean>;
 
   onEmailVerified?: (
     /**
@@ -75,7 +73,12 @@ export interface Lead {
 
   emailVerified: boolean;
 
+  verificationEmailSentAt: Date | null;
+
   metadata?: string;
 }
 
-export type LeadPayload = Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'emailVerified'>;
+export type LeadPayload = Omit<
+  Lead,
+  'id' | 'createdAt' | 'updatedAt' | 'emailVerified' | 'verificationEmailSentAt'
+>;

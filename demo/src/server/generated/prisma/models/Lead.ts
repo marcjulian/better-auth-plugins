@@ -30,6 +30,7 @@ export type LeadMinAggregateOutputType = {
   updatedAt: Date | null
   email: string | null
   emailVerified: boolean | null
+  verificationEmailSentAt: Date | null
   metadata: string | null
 }
 
@@ -39,6 +40,7 @@ export type LeadMaxAggregateOutputType = {
   updatedAt: Date | null
   email: string | null
   emailVerified: boolean | null
+  verificationEmailSentAt: Date | null
   metadata: string | null
 }
 
@@ -48,6 +50,7 @@ export type LeadCountAggregateOutputType = {
   updatedAt: number
   email: number
   emailVerified: number
+  verificationEmailSentAt: number
   metadata: number
   _all: number
 }
@@ -59,6 +62,7 @@ export type LeadMinAggregateInputType = {
   updatedAt?: true
   email?: true
   emailVerified?: true
+  verificationEmailSentAt?: true
   metadata?: true
 }
 
@@ -68,6 +72,7 @@ export type LeadMaxAggregateInputType = {
   updatedAt?: true
   email?: true
   emailVerified?: true
+  verificationEmailSentAt?: true
   metadata?: true
 }
 
@@ -77,6 +82,7 @@ export type LeadCountAggregateInputType = {
   updatedAt?: true
   email?: true
   emailVerified?: true
+  verificationEmailSentAt?: true
   metadata?: true
   _all?: true
 }
@@ -159,6 +165,7 @@ export type LeadGroupByOutputType = {
   updatedAt: Date
   email: string
   emailVerified: boolean
+  verificationEmailSentAt: Date | null
   metadata: string | null
   _count: LeadCountAggregateOutputType | null
   _min: LeadMinAggregateOutputType | null
@@ -189,6 +196,7 @@ export type LeadWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
   email?: Prisma.StringFilter<"Lead"> | string
   emailVerified?: Prisma.BoolFilter<"Lead"> | boolean
+  verificationEmailSentAt?: Prisma.DateTimeNullableFilter<"Lead"> | Date | string | null
   metadata?: Prisma.StringNullableFilter<"Lead"> | string | null
 }
 
@@ -198,6 +206,7 @@ export type LeadOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
+  verificationEmailSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
@@ -210,6 +219,7 @@ export type LeadWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
   emailVerified?: Prisma.BoolFilter<"Lead"> | boolean
+  verificationEmailSentAt?: Prisma.DateTimeNullableFilter<"Lead"> | Date | string | null
   metadata?: Prisma.StringNullableFilter<"Lead"> | string | null
 }, "id" | "email">
 
@@ -219,6 +229,7 @@ export type LeadOrderByWithAggregationInput = {
   updatedAt?: Prisma.SortOrder
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
+  verificationEmailSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.LeadCountOrderByAggregateInput
   _max?: Prisma.LeadMaxOrderByAggregateInput
@@ -234,6 +245,7 @@ export type LeadScalarWhereWithAggregatesInput = {
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Lead"> | Date | string
   email?: Prisma.StringWithAggregatesFilter<"Lead"> | string
   emailVerified?: Prisma.BoolWithAggregatesFilter<"Lead"> | boolean
+  verificationEmailSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Lead"> | Date | string | null
   metadata?: Prisma.StringNullableWithAggregatesFilter<"Lead"> | string | null
 }
 
@@ -243,6 +255,7 @@ export type LeadCreateInput = {
   updatedAt?: Date | string
   email: string
   emailVerified?: boolean
+  verificationEmailSentAt?: Date | string | null
   metadata?: string | null
 }
 
@@ -252,6 +265,7 @@ export type LeadUncheckedCreateInput = {
   updatedAt?: Date | string
   email: string
   emailVerified?: boolean
+  verificationEmailSentAt?: Date | string | null
   metadata?: string | null
 }
 
@@ -261,6 +275,7 @@ export type LeadUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -270,6 +285,7 @@ export type LeadUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -279,6 +295,7 @@ export type LeadCreateManyInput = {
   updatedAt?: Date | string
   email: string
   emailVerified?: boolean
+  verificationEmailSentAt?: Date | string | null
   metadata?: string | null
 }
 
@@ -288,6 +305,7 @@ export type LeadUpdateManyMutationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -297,6 +315,7 @@ export type LeadUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  verificationEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -306,6 +325,7 @@ export type LeadCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
+  verificationEmailSentAt?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
 }
 
@@ -315,6 +335,7 @@ export type LeadMaxOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
+  verificationEmailSentAt?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
 }
 
@@ -324,6 +345,7 @@ export type LeadMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
+  verificationEmailSentAt?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
 }
 
@@ -335,6 +357,7 @@ export type LeadSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   email?: boolean
   emailVerified?: boolean
+  verificationEmailSentAt?: boolean
   metadata?: boolean
 }, ExtArgs["result"]["lead"]>
 
@@ -344,6 +367,7 @@ export type LeadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   updatedAt?: boolean
   email?: boolean
   emailVerified?: boolean
+  verificationEmailSentAt?: boolean
   metadata?: boolean
 }, ExtArgs["result"]["lead"]>
 
@@ -353,6 +377,7 @@ export type LeadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   updatedAt?: boolean
   email?: boolean
   emailVerified?: boolean
+  verificationEmailSentAt?: boolean
   metadata?: boolean
 }, ExtArgs["result"]["lead"]>
 
@@ -362,10 +387,11 @@ export type LeadSelectScalar = {
   updatedAt?: boolean
   email?: boolean
   emailVerified?: boolean
+  verificationEmailSentAt?: boolean
   metadata?: boolean
 }
 
-export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "emailVerified" | "metadata", ExtArgs["result"]["lead"]>
+export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "emailVerified" | "verificationEmailSentAt" | "metadata", ExtArgs["result"]["lead"]>
 
 export type $LeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Lead"
@@ -376,6 +402,7 @@ export type $LeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     updatedAt: Date
     email: string
     emailVerified: boolean
+    verificationEmailSentAt: Date | null
     metadata: string | null
   }, ExtArgs["result"]["lead"]>
   composites: {}
@@ -805,6 +832,7 @@ export interface LeadFieldRefs {
   readonly updatedAt: Prisma.FieldRef<"Lead", 'DateTime'>
   readonly email: Prisma.FieldRef<"Lead", 'String'>
   readonly emailVerified: Prisma.FieldRef<"Lead", 'Boolean'>
+  readonly verificationEmailSentAt: Prisma.FieldRef<"Lead", 'DateTime'>
   readonly metadata: Prisma.FieldRef<"Lead", 'String'>
 }
     

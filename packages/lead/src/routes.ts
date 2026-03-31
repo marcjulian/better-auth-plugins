@@ -46,8 +46,6 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
         ],
       });
 
-      let isNewLead = false;
-
       if (!lead) {
         try {
           lead = await ctx.context.adapter.create<LeadPayload, Lead>({
@@ -57,7 +55,6 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
               metadata: metadata ? JSON.stringify(metadata) : undefined,
             },
           });
-          isNewLead = true;
         } catch (e) {
           ctx.context.logger.info('Error creating lead');
           lead = await ctx.context.adapter.findOne<Lead>({
@@ -81,12 +78,22 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
         );
         const url = `${ctx.context.baseURL}/lead/verify?token=${token}`;
 
-        await ctx.context.runInBackgroundOrAwait(
-          options.sendVerificationEmail(
-            { email: normalizedEmail, url, token, createdAt: lead.createdAt, isNewLead },
-            ctx.request,
-          ),
+        const sent = await options.sendVerificationEmail(
+          {
+            lead,
+            url,
+            token,
+          },
+          ctx.request,
         );
+
+        if (sent) {
+          await ctx.context.adapter.update<Lead>({
+            model: 'lead',
+            where: [{ field: 'email', value: normalizedEmail }],
+            update: { verificationEmailSentAt: new Date() },
+          });
+        }
       }
 
       return ctx.json({
@@ -272,12 +279,22 @@ export const resend = <O extends LeadOptions>(options: O) =>
         );
         const url = `${ctx.context.baseURL}/lead/verify?token=${token}`;
 
-        await ctx.context.runInBackgroundOrAwait(
-          options.sendVerificationEmail(
-            { email: normalizedEmail, url, token, createdAt: lead.createdAt, isNewLead: false },
-            ctx.request,
-          ),
+        const sent = await options.sendVerificationEmail(
+          {
+            lead,
+            url,
+            token,
+          },
+          ctx.request,
         );
+
+        if (sent) {
+          await ctx.context.adapter.update<Lead>({
+            model: 'lead',
+            where: [{ field: 'email', value: normalizedEmail }],
+            update: { verificationEmailSentAt: new Date() },
+          });
+        }
       }
 
       return ctx.json({
