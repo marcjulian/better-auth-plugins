@@ -8,6 +8,35 @@ import { getSchema } from './schema';
 import type { Consent, CookieConsentOptions, CookieConsentRecord } from './type';
 
 /**
+ * Cookie name used to store the anonymous consent ID.
+ * The client sets this cookie so the server-side hook can
+ * read it during sign-in to auto-merge anonymous consent.
+ */
+export const ANONYMOUS_ID_COOKIE = 'cookie-consent-anon-id';
+
+/**
+ * Parse a single cookie value from a raw `Cookie` header string.
+ */
+function parseCookieValue(
+  cookieHeader: string | null | undefined,
+  name: string,
+): string | undefined {
+  if (!cookieHeader) return undefined;
+  for (const pair of cookieHeader.split('; ')) {
+    const [key, ...valueParts] = pair.split('=');
+    if (key === name && valueParts.length > 0) {
+      const raw = valueParts.join('=');
+      try {
+        return decodeURIComponent(raw);
+      } catch {
+        return raw;
+      }
+    }
+  }
+  return undefined;
+}
+
+/**
  * Preset validation schema for cookie consent.
  * Validates the standard consent categories: necessary, analytics, marketing, functional.
  * Use this with `consent.validationSchema` in the plugin options.
@@ -47,9 +76,11 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
             const userId = ctx.context.newSession?.user?.id;
             if (!userId) return;
 
-            // Look for anonymousId in the request body
-            const body = ctx.body as { anonymousId?: string } | undefined;
-            const anonymousId = body?.anonymousId;
+            // Read anonymousId from the cookie set by the client
+            const anonymousId = parseCookieValue(
+              ctx.headers?.get('cookie'),
+              ANONYMOUS_ID_COOKIE,
+            );
             if (!anonymousId) return;
 
             const anonymousRecord =

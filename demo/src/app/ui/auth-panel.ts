@@ -195,8 +195,6 @@ export class AuthPanel implements OnDestroy {
       this.session.set(data as { user: { name: string; email: string } });
       toast.success('Signed in successfully!');
       this.resetForm();
-      // Auto-merge anonymous cookie consent
-      await this.autoMergeConsent();
     }
   }
 
@@ -231,8 +229,6 @@ export class AuthPanel implements OnDestroy {
       this.session.set(data as { user: { name: string; email: string } });
       toast.success('Account created successfully!');
       this.resetForm();
-      // Auto-merge anonymous cookie consent
-      await this.autoMergeConsent();
     }
   }
 
@@ -270,20 +266,6 @@ export class AuthPanel implements OnDestroy {
       toast.success('Cookie consent merged to your account');
     } else {
       toast.info('No anonymous consent found to merge');
-    }
-  }
-
-  private async autoMergeConsent() {
-    const anonymousId = this.getAnonymousId();
-    if (!anonymousId) return;
-
-    try {
-      const { data } = await authClient.cookieConsent.mergeConsent(anonymousId);
-      if (data?.merged) {
-        toast.info('Cookie preferences linked to your account');
-      }
-    } catch {
-      // Silent fail — merge is best-effort on login
     }
   }
 

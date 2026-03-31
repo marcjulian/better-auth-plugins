@@ -45,6 +45,8 @@ function getOrCreateAnonymousId(): string {
     id = crypto.randomUUID();
     localStorage.setItem(ANONYMOUS_ID_KEY, id);
   }
+  // Always sync as a cookie so the server can read it during sign-in
+  document.cookie = `${ANONYMOUS_ID_KEY}=${encodeURIComponent(id)}; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`;
   return id;
 }
 
