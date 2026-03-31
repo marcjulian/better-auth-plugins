@@ -26,8 +26,6 @@ export interface LeadOptions {
     request?: Request,
   ) => Promise<void>;
 
-  // TODO add hook afterEmailVerified
-
   /**
    * Number of seconds the verification token is
    * valid for.
