@@ -3,24 +3,41 @@ import { atom } from 'nanostores';
 
 import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
 import type { cookieConsentPlugin } from './index';
-import type { Consent } from './type';
 
 /**
  * Client-side consent state, kept in sync with the server.
  */
-export interface ConsentState {
-  consent: Consent | null;
+export interface ConsentState<TConsent extends Record<string, boolean> = Record<string, boolean>> {
+  consent: TConsent | null;
   consentVersion: string | null;
   versionMatch: boolean;
 }
 
-export const cookieConsentClient = () => {
+/**
+ * Client plugin for cookie consent management.
+ *
+ * @typeParam TConsent - The consent shape, typically `z.infer<typeof yourConsentSchema>`.
+ *
+ * @example
+ * ```ts
+ * import { defaultConsentSchema } from 'better-auth-cookie-consent';
+ * import { cookieConsentClient } from 'better-auth-cookie-consent/client';
+ * import type { z } from 'zod';
+ *
+ * const authClient = createAuthClient({
+ *   plugins: [cookieConsentClient<z.infer<typeof defaultConsentSchema>>()],
+ * });
+ * ```
+ */
+export const cookieConsentClient = <
+  TConsent extends Record<string, boolean> = Record<string, boolean>,
+>() => {
   return {
     id: 'cookie-consent',
     $InferServerPlugin: {} as ReturnType<typeof cookieConsentPlugin>,
 
     getAtoms($fetch) {
-      const $consent = atom<ConsentState>({
+      const $consent = atom<ConsentState<TConsent>>({
         consent: null,
         consentVersion: null,
         versionMatch: false,
@@ -30,7 +47,7 @@ export const cookieConsentClient = () => {
 
     getActions($fetch, $store) {
       const consentAtom = $store.atoms.$consent as ReturnType<
-        typeof atom<ConsentState>
+        typeof atom<ConsentState<TConsent>>
       >;
 
       async function syncFromServer(anonymousId?: string) {
@@ -44,7 +61,7 @@ export const cookieConsentClient = () => {
             id: string;
             userId?: string | null;
             anonymousId: string;
-            consent: Consent;
+            consent: TConsent;
             consentVersion: string;
             timestamp: string;
           } | null;
@@ -64,10 +81,12 @@ export const cookieConsentClient = () => {
         cookieConsent: {
           /**
            * Set consent preferences on the server.
+           * Also used for accept-all / reject-all by passing the
+           * appropriate consent object (all `true` or all `false`).
            */
           setConsent: async (data: {
             anonymousId: string;
-            consent: Consent;
+            consent: TConsent;
             consentVersion: string;
           }) => {
             const res = await $fetch<{ status: boolean }>('/cookie-consent/set', {
@@ -89,70 +108,6 @@ export const cookieConsentClient = () => {
            */
           getConsent: async (anonymousId?: string) => {
             return syncFromServer(anonymousId);
-          },
-
-          /**
-           * Accept all consent categories.
-           * Categories are derived from the server's validation schema.
-           */
-          acceptAll: async (data: {
-            anonymousId: string;
-            consentVersion: string;
-          }) => {
-            const res = await $fetch<{ status: boolean }>('/cookie-consent/accept-all', {
-              method: 'POST',
-              body: {
-                anonymousId: data.anonymousId,
-                consentVersion: data.consentVersion,
-              },
-            });
-            if (res.data?.status) {
-              await syncFromServer(data.anonymousId);
-            }
-            return res;
-          },
-
-          /**
-           * Reject all consent categories.
-           * Categories are derived from the server's validation schema.
-           */
-          rejectAll: async (data: {
-            anonymousId: string;
-            consentVersion: string;
-          }) => {
-            const res = await $fetch<{ status: boolean }>('/cookie-consent/reject-all', {
-              method: 'POST',
-              body: {
-                anonymousId: data.anonymousId,
-                consentVersion: data.consentVersion,
-              },
-            });
-            if (res.data?.status) {
-              await syncFromServer(data.anonymousId);
-            }
-            return res;
-          },
-
-          /**
-           * Update specific consent category preferences.
-           */
-          updatePreferences: async (data: {
-            anonymousId: string;
-            consent: Consent;
-            consentVersion: string;
-          }) => {
-            const res = await $fetch<{ status: boolean }>('/cookie-consent/set', {
-              method: 'POST',
-              body: data,
-            });
-            if (res.data?.status) {
-              consentAtom.set({
-                consent: data.consent,
-                consentVersion: data.consentVersion,
-                versionMatch: true,
-              });
-            }
-            return res;
           },
 
           /**

@@ -3,7 +3,7 @@ import { createAuthMiddleware } from 'better-auth/api';
 import * as z from 'zod';
 
 import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
-import { acceptAllConsent, getConsent, mergeAnonymousConsentToUser, mergeConsent, rejectAllConsent, setConsent } from './routes';
+import { getConsent, mergeAnonymousConsentToUser, mergeConsent, setConsent } from './routes';
 import { getSchema } from './schema';
 import type { Consent, CookieConsentOptions, CookieConsentRecord } from './type';
 
@@ -64,8 +64,6 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
       setConsent: setConsent(options),
       getConsent: getConsent(options),
       mergeConsent: mergeConsent(options),
-      acceptAllConsent: acceptAllConsent(options),
-      rejectAllConsent: rejectAllConsent(options),
     },
     hooks: {
       after: [
@@ -99,7 +97,7 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
     rateLimit: [
       {
         pathMatcher: (path) =>
-          ['/cookie-consent/set', '/cookie-consent/merge', '/cookie-consent/accept-all', '/cookie-consent/reject-all'].includes(path),
+          ['/cookie-consent/set', '/cookie-consent/merge'].includes(path),
         window: options.rateLimit?.window ?? 10,
         max: options.rateLimit?.max ?? 10,
       },

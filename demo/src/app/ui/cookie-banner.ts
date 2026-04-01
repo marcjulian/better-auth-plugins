@@ -7,12 +7,14 @@ import { HlmSeparatorImports } from '@spartan-ng/helm/separator';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { toast } from 'ngx-sonner';
 
-import { authClient } from '../auth-client';
+import { authClient, type ConsentModel } from '../auth-client';
 import { injectAnonymousId } from './cookie-utils';
 
 const CONSENT_VERSION = 'v1';
 
-const CATEGORIES = [
+type CategoryId = keyof ConsentModel;
+
+const CATEGORIES: { id: CategoryId; label: string; description: string; locked: boolean }[] = [
   {
     id: 'necessary',
     label: 'Necessary',
@@ -173,7 +175,7 @@ export class CookieBanner implements OnDestroy {
   readonly loading = signal(false);
   readonly consentRecorded = signal(false);
 
-  readonly consent = signal<Record<string, boolean>>({
+  readonly consent = signal<ConsentModel>({
     necessary: true,
     analytics: false,
     marketing: false,
@@ -206,7 +208,7 @@ export class CookieBanner implements OnDestroy {
     this.visible.set(true);
   }
 
-  toggleCategory(id: string, checked: boolean) {
+  toggleCategory(id: CategoryId, checked: boolean) {
     this.consent.update((prev) => ({ ...prev, [id]: checked }));
   }
 
@@ -214,8 +216,10 @@ export class CookieBanner implements OnDestroy {
     this.loading.set(true);
     const anonId = this.anonymousId.getOrCreate();
 
-    const { error } = await authClient.cookieConsent.acceptAll({
+    const allAccepted: ConsentModel = { necessary: true, analytics: true, marketing: true, functional: true };
+    const { error } = await authClient.cookieConsent.setConsent({
       anonymousId: anonId,
+      consent: allAccepted,
       consentVersion: CONSENT_VERSION,
     });
 
@@ -225,10 +229,9 @@ export class CookieBanner implements OnDestroy {
       toast.error('Failed to save cookie preferences');
     } else {
       toast.success('All cookies accepted');
+      this.consent.set(allAccepted);
       this.visible.set(false);
       this.consentRecorded.set(true);
-      // Sync local state from server so reopening the banner shows correct values
-      await this.fetchAndApplyConsent(anonId);
     }
   }
 
@@ -236,8 +239,10 @@ export class CookieBanner implements OnDestroy {
     this.loading.set(true);
     const anonId = this.anonymousId.getOrCreate();
 
-    const { error } = await authClient.cookieConsent.rejectAll({
+    const allRejected: ConsentModel = { necessary: true, analytics: false, marketing: false, functional: false };
+    const { error } = await authClient.cookieConsent.setConsent({
       anonymousId: anonId,
+      consent: allRejected,
       consentVersion: CONSENT_VERSION,
     });
 
@@ -247,10 +252,9 @@ export class CookieBanner implements OnDestroy {
       toast.error('Failed to save cookie preferences');
     } else {
       toast.success('Non-essential cookies rejected');
+      this.consent.set(allRejected);
       this.visible.set(false);
       this.consentRecorded.set(true);
-      // Sync local state from server so reopening the banner shows correct values
-      await this.fetchAndApplyConsent(anonId);
     }
   }
 
@@ -258,9 +262,10 @@ export class CookieBanner implements OnDestroy {
     this.loading.set(true);
     const anonId = this.anonymousId.getOrCreate();
 
-    const { error } = await authClient.cookieConsent.updatePreferences({
+    const consentValue: ConsentModel = { ...this.consent(), necessary: true };
+    const { error } = await authClient.cookieConsent.setConsent({
       anonymousId: anonId,
-      consent: { ...this.consent(), necessary: true },
+      consent: consentValue,
       consentVersion: CONSENT_VERSION,
     });
 
@@ -324,7 +329,7 @@ export class CookieBanner implements OnDestroy {
     const { data, error } = await authClient.cookieConsent.getConsent(anonymousId);
 
     if (!error && data?.consent && data.versionMatch) {
-      this.consent.set(data.consent.consent);
+      this.consent.set(data.consent.consent as ConsentModel);
       this.visible.set(false);
       this.consentRecorded.set(true);
       // Ensure the anonymous ID cookie is set so consent persists after logout

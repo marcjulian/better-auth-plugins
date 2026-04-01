@@ -17,15 +17,6 @@ const setConsentSchema = z.object({
   }),
 });
 
-const acceptOrRejectSchema = z.object({
-  anonymousId: z.string().meta({
-    description: 'Anonymous identifier for unauthenticated users',
-  }),
-  consentVersion: z.string().meta({
-    description: 'Version of the consent policy',
-  }),
-});
-
 const getConsentSchema = z.object({
   anonymousId: z.string().optional().meta({
     description: 'Anonymous identifier fallback when no session exists',
@@ -171,94 +162,6 @@ export const mergeConsent = <O extends CookieConsentOptions>(_options: O) =>
     },
   );
 
-export const acceptAllConsent = <O extends CookieConsentOptions>(options: O) =>
-  createAuthEndpoint(
-    '/cookie-consent/accept-all',
-    {
-      method: 'POST',
-      body: acceptOrRejectSchema,
-    },
-    async (ctx) => {
-      const { anonymousId, consentVersion } = ctx.body;
-
-      if (!anonymousId) {
-        throw APIError.from('BAD_REQUEST', COOKIE_CONSENT_ERROR_CODES.MISSING_ANONYMOUS_ID);
-      }
-
-      const categories = getCategoriesFromSchema(options);
-      const consent: Record<string, boolean> = {};
-      for (const cat of categories) {
-        consent[cat] = true;
-      }
-
-      const validatedConsent = validateConsent(options, consent, ctx.context.logger);
-      const session = await getSessionFromCtx(ctx);
-      const userId = session?.user?.id ?? null;
-      const existing = await findConsentRecord(ctx, userId, anonymousId);
-      const consentJson = JSON.stringify(validatedConsent);
-      const now = new Date();
-
-      if (existing) {
-        await ctx.context.adapter.update<CookieConsentRecord>({
-          model: 'cookieConsent',
-          where: [{ field: 'id', value: existing.id }],
-          update: { userId, consent: consentJson, consentVersion, timestamp: now },
-        });
-      } else {
-        await ctx.context.adapter.create<CookieConsentPayload, CookieConsentRecord>({
-          model: 'cookieConsent',
-          data: { userId, anonymousId, consent: consentJson, consentVersion, timestamp: now },
-        });
-      }
-
-      return ctx.json({ status: true });
-    },
-  );
-
-export const rejectAllConsent = <O extends CookieConsentOptions>(options: O) =>
-  createAuthEndpoint(
-    '/cookie-consent/reject-all',
-    {
-      method: 'POST',
-      body: acceptOrRejectSchema,
-    },
-    async (ctx) => {
-      const { anonymousId, consentVersion } = ctx.body;
-
-      if (!anonymousId) {
-        throw APIError.from('BAD_REQUEST', COOKIE_CONSENT_ERROR_CODES.MISSING_ANONYMOUS_ID);
-      }
-
-      const categories = getCategoriesFromSchema(options);
-      const consent: Record<string, boolean> = {};
-      for (const cat of categories) {
-        consent[cat] = false;
-      }
-
-      const validatedConsent = validateConsent(options, consent, ctx.context.logger);
-      const session = await getSessionFromCtx(ctx);
-      const userId = session?.user?.id ?? null;
-      const existing = await findConsentRecord(ctx, userId, anonymousId);
-      const consentJson = JSON.stringify(validatedConsent);
-      const now = new Date();
-
-      if (existing) {
-        await ctx.context.adapter.update<CookieConsentRecord>({
-          model: 'cookieConsent',
-          where: [{ field: 'id', value: existing.id }],
-          update: { userId, consent: consentJson, consentVersion, timestamp: now },
-        });
-      } else {
-        await ctx.context.adapter.create<CookieConsentPayload, CookieConsentRecord>({
-          model: 'cookieConsent',
-          data: { userId, anonymousId, consent: consentJson, consentVersion, timestamp: now },
-        });
-      }
-
-      return ctx.json({ status: true });
-    },
-  );
-
 /**
  * Merge anonymous consent into a user's record.
  * Shared between the merge endpoint and the sign-in/sign-up hook.
@@ -374,34 +277,4 @@ function validateConsent(
   }
 
   return validationResult.value as Record<string, boolean>;
-}
-
-/**
- * Extract category keys from the validation schema.
- * Inspects the Zod schema's `shape` (or `_def.shape`) to derive keys.
- * Falls back to an empty array when no schema is configured.
- */
-function getCategoriesFromSchema(options: CookieConsentOptions): string[] {
-  const schema = options.consent?.validationSchema;
-  if (!schema) return [];
-
-  // Zod schemas expose a `shape` property containing the field definitions.
-  const shape = (schema as Record<string, unknown>)['shape'] as Record<string, unknown> | undefined;
-  if (shape && typeof shape === 'object') {
-    return Object.keys(shape);
-  }
-
-  // Fallback: inspect `_def.shape` (Zod internal)
-  const def = (schema as Record<string, unknown>)['_def'] as Record<string, unknown> | undefined;
-  if (def && typeof def === 'object') {
-    const defShape = def['shape'] as Record<string, unknown> | (() => Record<string, unknown>) | undefined;
-    if (typeof defShape === 'function') {
-      return Object.keys(defShape());
-    }
-    if (defShape && typeof defShape === 'object') {
-      return Object.keys(defShape);
-    }
-  }
-
-  return [];
 }

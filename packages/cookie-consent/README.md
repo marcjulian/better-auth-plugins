@@ -7,8 +7,7 @@ GDPR-compliant cookie consent management plugin for [Better Auth](https://better
 - Automatic merge of anonymous consent on sign-in / sign-up
 - Consent versioning with automatic invalidation
 - Validation schema support (e.g. Zod) to enforce consent shape
-- Client plugin with local state management via nanostores
-- Dedicated `acceptAll` / `rejectAll` endpoints — categories derived from the validation schema
+- Generic client plugin — `cookieConsentClient<z.infer<typeof schema>>()` types your consent model end-to-end
 
 ## How It Works
 
@@ -23,11 +22,11 @@ GDPR-compliant cookie consent management plugin for [Better Auth](https://better
                                                               │
                                                               ▼
                                                     ┌──────────────────┐
-                                                    │ Server stores     │
-                                                    │ consent with      │
-                                                    │ anonymousId       │
-                                                    │ (cookie set on    │
-                                                    │  browser)         │
+                                                    │ Client calls      │
+                                                    │ setConsent with   │
+                                                    │ typed consent     │
+                                                    │ object → server   │
+                                                    │ stores it         │
                                                     └──────────────────┘
 ```
 
@@ -106,7 +105,7 @@ export const auth = betterAuth({
 | consentVersion   | `string`            | `"v1"`  | Current consent policy version             |
 | consent.validationSchema | `StandardSchemaV1` | — | Schema to validate consent (e.g. Zod object) |
 | onConsentChange  | `function`          | —       | Callback when consent is created/updated   |
-| rateLimit        | `object`            | —       | Rate limit for set/merge/accept/reject endpoints |
+| rateLimit        | `object`            | —       | Rate limit for set/merge endpoints         |
 | schema           | `object`            | —       | Schema overrides for the cookieConsent table |
 
 ### Validation Schema
@@ -125,18 +124,25 @@ import { defaultConsentSchema } from 'better-auth-cookie-consent';
 // })
 ```
 
-The `acceptAll` and `rejectAll` endpoints derive their category keys from this schema automatically — no need to pass categories from the client.
-
 ## Client Setup
+
+The client plugin accepts a generic type parameter for the consent shape. Use `z.infer<typeof schema>` to get full end-to-end typing:
 
 ```ts
 import { createAuthClient } from 'better-auth/client';
+import { defaultConsentSchema } from 'better-auth-cookie-consent';
 import { cookieConsentClient } from 'better-auth-cookie-consent/client';
+import type { z } from 'zod';
+
+type ConsentModel = z.infer<typeof defaultConsentSchema>;
+// { necessary: boolean; analytics: boolean; marketing: boolean; functional: boolean }
 
 export const authClient = createAuthClient({
-  plugins: [cookieConsentClient()],
+  plugins: [cookieConsentClient<ConsentModel>()],
 });
 ```
+
+This types `setConsent`, `getConsent`, and the nanostore atom so that your consent object is fully checked at compile time.
 
 ## Usage
 
@@ -155,44 +161,32 @@ await authClient.cookieConsent.setConsent({
 });
 ```
 
+### Accept All / Reject All
+
+Build the consent object on the client and call `setConsent`:
+
+```ts
+// Accept all
+await authClient.cookieConsent.setConsent({
+  anonymousId: 'anon-123',
+  consent: { necessary: true, analytics: true, marketing: true, functional: true },
+  consentVersion: 'v1',
+});
+
+// Reject all (keep necessary)
+await authClient.cookieConsent.setConsent({
+  anonymousId: 'anon-123',
+  consent: { necessary: true, analytics: false, marketing: false, functional: false },
+  consentVersion: 'v1',
+});
+```
+
 ### Get Consent
 
 ```ts
 const { data } = await authClient.cookieConsent.getConsent('anon-123');
 // data.consent — the consent record (or null)
 // data.versionMatch — whether stored version matches current
-```
-
-### Accept All
-
-Categories are derived from the server's validation schema:
-
-```ts
-await authClient.cookieConsent.acceptAll({
-  anonymousId: 'anon-123',
-  consentVersion: 'v1',
-});
-```
-
-### Reject All
-
-Categories are derived from the server's validation schema:
-
-```ts
-await authClient.cookieConsent.rejectAll({
-  anonymousId: 'anon-123',
-  consentVersion: 'v1',
-});
-```
-
-### Update Preferences
-
-```ts
-await authClient.cookieConsent.updatePreferences({
-  anonymousId: 'anon-123',
-  consent: { necessary: true, analytics: true, marketing: false, functional: true },
-  consentVersion: 'v1',
-});
 ```
 
 ### Merge Anonymous Consent After Login
@@ -241,11 +235,33 @@ Subscribe to the auth client's session state. When the session transitions from 
 
 ### 4. Accept / Reject / Customize
 
-- **Accept All**: Call `authClient.cookieConsent.acceptAll({ anonymousId, consentVersion })`
-- **Reject All**: Call `authClient.cookieConsent.rejectAll({ anonymousId, consentVersion })`
-- **Custom**: Call `authClient.cookieConsent.setConsent({ anonymousId, consent, consentVersion })`
+All actions use the `setConsent` endpoint — the client builds the consent object:
 
-### 5. Re-open Banner
+- **Accept All**: Build `{ necessary: true, analytics: true, ... }` and call `setConsent`
+- **Reject All**: Build `{ necessary: true, analytics: false, ... }` and call `setConsent`
+- **Custom**: Use form values and call `setConsent`
+
+The consent object is validated against the server's `validationSchema` on every write.
+
+### 5. Typing Categories
+
+Use `keyof` on the inferred consent model to type your banner categories:
+
+```ts
+import type { z } from 'zod';
+import { defaultConsentSchema } from 'better-auth-cookie-consent';
+
+type ConsentModel = z.infer<typeof defaultConsentSchema>;
+type CategoryId = keyof ConsentModel;
+
+const CATEGORIES: { id: CategoryId; label: string }[] = [
+  { id: 'necessary', label: 'Necessary' },
+  { id: 'analytics', label: 'Analytics' },
+  // TypeScript enforces that id must be a valid consent category
+];
+```
+
+### 6. Re-open Banner
 
 After consent is recorded, provide a way for users to manage their preferences (e.g. a "Manage Cookies" link in the footer).
 
@@ -264,13 +280,11 @@ if (await hasConsent(ctx, 'analytics')) {
 
 ## API Endpoints
 
-| Method | Path                          | Description                                 |
-| ------ | ----------------------------- | ------------------------------------------- |
-| POST   | `/cookie-consent/set`         | Create or update consent with custom values |
-| GET    | `/cookie-consent/get`         | Retrieve consent                            |
-| POST   | `/cookie-consent/accept-all`  | Accept all categories (from schema)         |
-| POST   | `/cookie-consent/reject-all`  | Reject all categories (from schema)         |
-| POST   | `/cookie-consent/merge`       | Merge anonymous consent to user             |
+| Method | Path                    | Description                                 |
+| ------ | ----------------------- | ------------------------------------------- |
+| POST   | `/cookie-consent/set`   | Create or update consent                    |
+| GET    | `/cookie-consent/get`   | Retrieve consent                            |
+| POST   | `/cookie-consent/merge` | Merge anonymous consent to user             |
 
 ## Auto-Merge on Sign-In / Sign-Up
 
