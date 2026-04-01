@@ -227,6 +227,8 @@ export class CookieBanner implements OnDestroy {
       toast.success('All cookies accepted');
       this.visible.set(false);
       this.consentRecorded.set(true);
+      // Sync local state from server so reopening the banner shows correct values
+      await this.fetchAndApplyConsent(anonId);
     }
   }
 
@@ -247,6 +249,8 @@ export class CookieBanner implements OnDestroy {
       toast.success('Non-essential cookies rejected');
       this.visible.set(false);
       this.consentRecorded.set(true);
+      // Sync local state from server so reopening the banner shows correct values
+      await this.fetchAndApplyConsent(anonId);
     }
   }
 

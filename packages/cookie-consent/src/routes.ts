@@ -280,6 +280,7 @@ export async function mergeAnonymousConsentToUser(
   });
 
   if (!anonymousRecord || anonymousRecord.userId) return false;
+  // ^ Skip if record doesn't exist or is already linked to a user (already merged)
 
   const userRecord = await adapter.findOne<CookieConsentRecord>({
     model: 'cookieConsent',
