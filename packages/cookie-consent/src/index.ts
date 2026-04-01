@@ -73,8 +73,8 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
           // biometrics, passkey, phone, etc.
           matcher: (context) => {
             return (
-              context.path.startsWith('/sign-in/') ||
-              context.path.startsWith('/sign-up/')
+              !!context.path &&
+              (context.path.startsWith('/sign-in/') || context.path.startsWith('/sign-up/'))
             );
           },
           handler: createAuthMiddleware(async (ctx) => {
@@ -82,10 +82,7 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
             if (!userId) return;
 
             // Read anonymousId from the cookie set by the client
-            const anonymousId = parseCookieValue(
-              ctx.headers?.get('cookie'),
-              ANONYMOUS_ID_COOKIE,
-            );
+            const anonymousId = parseCookieValue(ctx.headers?.get('cookie'), ANONYMOUS_ID_COOKIE);
             if (!anonymousId) return;
 
             await mergeAnonymousConsentToUser(ctx.context.adapter, userId, anonymousId);
@@ -96,8 +93,7 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
     options: options as NoInfer<O>,
     rateLimit: [
       {
-        pathMatcher: (path) =>
-          ['/cookie-consent/set', '/cookie-consent/merge'].includes(path),
+        pathMatcher: (path) => ['/cookie-consent/set', '/cookie-consent/merge'].includes(path),
         window: options.rateLimit?.window ?? 10,
         max: options.rateLimit?.max ?? 10,
       },

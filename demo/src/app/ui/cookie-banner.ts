@@ -1,5 +1,12 @@
 import { isPlatformBrowser } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+  PLATFORM_ID,
+  signal,
+} from '@angular/core';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -56,9 +63,7 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
   },
   template: `
     @if (visible()) {
-      <div
-        class="fixed inset-x-0 bottom-0 z-50 border-t bg-background p-6 shadow-lg"
-      >
+      <div class="bg-background fixed inset-x-0 bottom-0 z-50 border-t p-6 shadow-lg">
         <div class="mx-auto max-w-4xl">
           <div class="mb-4">
             <h3 class="text-lg font-semibold">🍪 Cookie Preferences</h3>
@@ -72,7 +77,7 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
               @for (category of categories; track category.id) {
                 <div class="flex items-start gap-3">
                   <hlm-checkbox
-                    [id]="'consent-' + category.id"
+                    [id]="'consent-' + category.id.toString()"
                     [checked]="consent()[category.id] ?? false"
                     [disabled]="category.locked"
                     (checkedChange)="toggleCategory(category.id, $event)"
@@ -81,7 +86,7 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
                     <label
                       hlmFieldLabel
                       class="text-sm font-medium"
-                      [for]="'consent-' + category.id"
+                      [for]="'consent-' + category.id.toString()"
                     >
                       {{ category.label }}
                       @if (category.locked) {
@@ -101,12 +106,7 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
 
           <div class="flex flex-wrap items-center gap-3">
             @if (!showDetails()) {
-              <button
-                hlmBtn
-                variant="outline"
-                size="sm"
-                (click)="showDetails.set(true)"
-              >
+              <button hlmBtn variant="outline" size="sm" (click)="showDetails.set(true)">
                 Customize
               </button>
             }
@@ -126,22 +126,11 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
               </button>
             }
 
-            <button
-              hlmBtn
-              variant="outline"
-              size="sm"
-              [disabled]="loading()"
-              (click)="rejectAll()"
-            >
+            <button hlmBtn variant="outline" size="sm" [disabled]="loading()" (click)="rejectAll()">
               Reject All
             </button>
 
-            <button
-              hlmBtn
-              size="sm"
-              [disabled]="loading()"
-              (click)="acceptAll()"
-            >
+            <button hlmBtn size="sm" [disabled]="loading()" (click)="acceptAll()">
               @if (loading()) {
                 <hlm-spinner />
               }
@@ -216,7 +205,12 @@ export class CookieBanner implements OnDestroy {
     this.loading.set(true);
     const anonId = this.anonymousId.getOrCreate();
 
-    const allAccepted: ConsentModel = { necessary: true, analytics: true, marketing: true, functional: true };
+    const allAccepted: ConsentModel = {
+      necessary: true,
+      analytics: true,
+      marketing: true,
+      functional: true,
+    };
     const { error } = await authClient.cookieConsent.setConsent({
       anonymousId: anonId,
       consent: allAccepted,
@@ -239,7 +233,12 @@ export class CookieBanner implements OnDestroy {
     this.loading.set(true);
     const anonId = this.anonymousId.getOrCreate();
 
-    const allRejected: ConsentModel = { necessary: true, analytics: false, marketing: false, functional: false };
+    const allRejected: ConsentModel = {
+      necessary: true,
+      analytics: false,
+      marketing: false,
+      functional: false,
+    };
     const { error } = await authClient.cookieConsent.setConsent({
       anonymousId: anonId,
       consent: allRejected,
