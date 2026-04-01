@@ -1,4 +1,9 @@
-import { BASE_ERROR_CODES, type InternalLogger } from 'better-auth';
+import {
+  BASE_ERROR_CODES,
+  type BetterAuthOptions,
+  type DBAdapter,
+  type InternalLogger,
+} from 'better-auth';
 import { APIError, createAuthEndpoint, getSessionFromCtx } from 'better-auth/api';
 import * as z from 'zod';
 
@@ -178,18 +183,7 @@ export const mergeConsent = <O extends CookieConsentOptions>(_options: O) =>
  * @returns `true` if consent was merged, `false` if no anonymous record was found.
  */
 export async function mergeAnonymousConsentToUser(
-  adapter: {
-    findOne: <T>(opts: {
-      model: string;
-      where: { field: string; value: string }[];
-    }) => Promise<T | null>;
-    update: <T>(opts: {
-      model: string;
-      where: { field: string; value: string }[];
-      update: Partial<T>;
-    }) => Promise<T | null>;
-    delete: (opts: { model: string; where: { field: string; value: string }[] }) => Promise<void>;
-  },
+  adapter: DBAdapter<BetterAuthOptions>,
   userId: string,
   anonymousId: string,
 ): Promise<boolean> {
@@ -240,12 +234,7 @@ export async function mergeAnonymousConsentToUser(
 async function findConsentRecord(
   ctx: {
     context: {
-      adapter: {
-        findOne: <T>(opts: {
-          model: string;
-          where: { field: string; value: string }[];
-        }) => Promise<T | null>;
-      };
+      adapter: DBAdapter<BetterAuthOptions>;
     };
   },
   userId: string | null | undefined,

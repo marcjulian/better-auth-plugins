@@ -1,4 +1,4 @@
-import type { BetterAuthPlugin } from 'better-auth';
+import type { BetterAuthOptions, BetterAuthPlugin, DBAdapter } from 'better-auth';
 import { createAuthMiddleware } from 'better-auth/api';
 import * as z from 'zod';
 
@@ -115,12 +115,7 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
  */
 export async function getConsentFromCtx(ctx: {
   context: {
-    adapter: {
-      findOne: <T>(opts: {
-        model: string;
-        where: { field: string; value: string }[];
-      }) => Promise<T | null>;
-    };
+    adapter: DBAdapter<BetterAuthOptions>;
     session?: { user?: { id?: string } } | null;
   };
   query?: { anonymousId?: string };
