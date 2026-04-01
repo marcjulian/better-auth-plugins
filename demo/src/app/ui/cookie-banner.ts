@@ -76,54 +76,47 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
 
           @if (showDetails()) {
             <form (submit)="savePreferences($event)">
-              <hlm-field-group>
-                <fieldset hlmFieldset>
-                  <legend hlmFieldLegend variant="label">Cookie Categories</legend>
-                  <hlm-field-group data-slot="checkbox-group">
-                    @for (category of categories; track category.id) {
-                      <hlm-field orientation="horizontal">
-                        <hlm-checkbox
-                          [id]="'consent-' + category.id.toString()"
-                          [checked]="model()[category.id] ?? false"
-                          [disabled]="category.locked"
-                          (checkedChange)="handleConsentChange($event, category.id)"
-                        />
-                        <div class="grid gap-0.5">
-                          <label
-                            hlmFieldLabel
-                            class="text-sm font-medium"
-                            [for]="'consent-' + category.id.toString()"
-                          >
-                            {{ category.label }}
-                            @if (category.locked) {
-                              <span class="text-muted-foreground text-xs">(always on)</span>
-                            }
-                          </label>
-                          <p class="text-muted-foreground text-xs">
-                            {{ category.description }}
-                          </p>
-                        </div>
-                      </hlm-field>
-                    }
-                  </hlm-field-group>
-                </fieldset>
-              </hlm-field-group>
+              <fieldset hlmFieldset>
+                <legend hlmFieldLegend variant="label">Cookie Categories</legend>
+                <hlm-field-group data-slot="checkbox-group">
+                  @for (category of categories; track category.id) {
+                    <hlm-field orientation="horizontal">
+                      <hlm-checkbox
+                        [id]="'consent-' + category.id.toString()"
+                        [checked]="model()[category.id] ?? false"
+                        [disabled]="category.locked"
+                        (checkedChange)="handleConsentChange($event, category.id)"
+                      />
+                      <div class="grid gap-0.5">
+                        <label
+                          hlmFieldLabel
+                          class="font-normal"
+                          [for]="'consent-' + category.id.toString()"
+                        >
+                          {{ category.label }}
+                          @if (category.locked) {
+                            <span class="text-muted-foreground text-xs">(always on)</span>
+                          }
+                        </label>
+                        <p class="text-muted-foreground text-xs">
+                          {{ category.description }}
+                        </p>
+                      </div>
+                    </hlm-field>
+                  }
+                </hlm-field-group>
+              </fieldset>
 
               <brn-separator hlmSeparator class="my-4" />
 
               <div class="flex flex-wrap items-center gap-3">
-                <button
-                  hlmBtn
-                  variant="outline"
-                  size="sm"
-                  type="submit"
-                  [disabled]="loading()"
-                >
+                <button hlmBtn variant="outline" size="sm" type="submit" [disabled]="loading()">
                   @if (loading()) {
                     <hlm-spinner />
                   }
                   Save Preferences
                 </button>
+
                 <button
                   hlmBtn
                   variant="outline"
@@ -134,7 +127,14 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
                 >
                   Reject All
                 </button>
-                <button hlmBtn size="sm" type="button" [disabled]="loading()" (click)="acceptAll()">
+
+                <button
+                  hlmBtn
+                  size="sm"
+                  type="button"
+                  [disabled]="loading()"
+                  (click)="acceptAll()"
+                >
                   @if (loading()) {
                     <hlm-spinner />
                   }
@@ -147,9 +147,11 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
               <button hlmBtn variant="outline" size="sm" (click)="showDetails.set(true)">
                 Customize
               </button>
+
               <button hlmBtn variant="outline" size="sm" [disabled]="loading()" (click)="rejectAll()">
                 Reject All
               </button>
+
               <button hlmBtn size="sm" [disabled]="loading()" (click)="acceptAll()">
                 @if (loading()) {
                   <hlm-spinner />
