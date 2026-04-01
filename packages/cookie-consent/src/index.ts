@@ -68,9 +68,13 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
     hooks: {
       after: [
         {
-          // After sign-in, merge anonymous consent to user
+          // After sign-in or sign-up, merge anonymous consent to user
           matcher: (context) => {
-            return context.path === '/sign-in/email' || context.path === '/sign-in/social';
+            return (
+              context.path === '/sign-in/email' ||
+              context.path === '/sign-in/social' ||
+              context.path === '/sign-up/email'
+            );
           },
           handler: createAuthMiddleware(async (ctx) => {
             const userId = ctx.context.newSession?.user?.id;

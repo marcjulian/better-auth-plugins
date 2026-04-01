@@ -9,7 +9,6 @@ import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { toast } from 'ngx-sonner';
 
 import { authClient } from '../auth-client';
-import { injectAnonymousId } from './cookie-utils';
 
 type AuthMode = 'sign-in' | 'sign-up';
 
@@ -40,13 +39,6 @@ type AuthMode = 'sign-in' | 'sign-up';
             <p class="font-medium">{{ userName() }}</p>
             <p class="text-sm text-muted-foreground">{{ userEmail() }}</p>
           </div>
-
-          <button hlmBtn variant="outline" class="w-full" [disabled]="loading()" (click)="mergeConsent()">
-            @if (merging()) {
-              <hlm-spinner />
-            }
-            Merge Cookie Consent
-          </button>
 
           <brn-separator hlmSeparator />
 
@@ -147,13 +139,11 @@ type AuthMode = 'sign-in' | 'sign-up';
 })
 export class AuthPanel implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly anonymousId = injectAnonymousId();
 
   readonly mode = signal<AuthMode>('sign-in');
   readonly submitting = signal(false);
   readonly signingOut = signal(false);
-  readonly merging = signal(false);
-  readonly loading = computed(() => this.submitting() || this.signingOut() || this.merging());
+  readonly loading = computed(() => this.submitting() || this.signingOut());
 
   private readonly session = signal<{ user: { name: string; email: string } } | null>(null);
   readonly isSignedIn = computed(() => this.session() !== null);
@@ -254,28 +244,6 @@ export class AuthPanel implements OnDestroy {
     } else {
       this.session.set(null);
       toast.success('Signed out');
-    }
-  }
-
-  async mergeConsent() {
-    const anonId = this.anonymousId.get();
-    if (!anonId) {
-      toast.error('No anonymous consent to merge');
-      return;
-    }
-
-    this.merging.set(true);
-
-    const { data, error } = await authClient.cookieConsent.mergeConsent(anonId);
-
-    this.merging.set(false);
-
-    if (error) {
-      toast.error(error?.message || 'Failed to merge cookie consent');
-    } else if (data?.merged) {
-      toast.success('Cookie consent merged to your account');
-    } else {
-      toast.info('No anonymous consent found to merge');
     }
   }
 
