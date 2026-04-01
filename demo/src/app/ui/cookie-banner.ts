@@ -7,6 +7,7 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
+import { form, FormField, submit } from '@angular/forms/signals';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -51,6 +52,7 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
 @Component({
   selector: 'ba-cookie-banner',
   imports: [
+    FormField,
     HlmButtonImports,
     HlmCheckboxImports,
     HlmFieldImports,
@@ -73,70 +75,89 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
           </div>
 
           @if (showDetails()) {
-            <div class="mb-4 space-y-3">
-              @for (category of categories; track category.id) {
-                <div class="flex items-start gap-3">
-                  <hlm-checkbox
-                    [id]="'consent-' + category.id.toString()"
-                    [checked]="consent()[category.id] ?? false"
-                    [disabled]="category.locked"
-                    (checkedChange)="toggleCategory(category.id, $event)"
-                  />
-                  <div class="grid gap-0.5">
-                    <label
-                      hlmFieldLabel
-                      class="text-sm font-medium"
-                      [for]="'consent-' + category.id.toString()"
-                    >
-                      {{ category.label }}
-                      @if (category.locked) {
-                        <span class="text-muted-foreground text-xs">(always on)</span>
-                      }
-                    </label>
-                    <p class="text-muted-foreground text-xs">
-                      {{ category.description }}
-                    </p>
-                  </div>
-                </div>
-              }
-            </div>
+            <form (submit)="savePreferences($event)">
+              <hlm-field-group>
+                <fieldset hlmFieldset>
+                  <legend hlmFieldLegend variant="label">Cookie Categories</legend>
+                  <hlm-field-group data-slot="checkbox-group">
+                    @for (category of categories; track category.id) {
+                      <hlm-field orientation="horizontal">
+                        <hlm-checkbox
+                          [id]="'consent-' + category.id.toString()"
+                          [checked]="model()[category.id] ?? false"
+                          [disabled]="category.locked"
+                          (checkedChange)="handleConsentChange($event, category.id)"
+                        />
+                        <div class="grid gap-0.5">
+                          <label
+                            hlmFieldLabel
+                            class="text-sm font-medium"
+                            [for]="'consent-' + category.id.toString()"
+                          >
+                            {{ category.label }}
+                            @if (category.locked) {
+                              <span class="text-muted-foreground text-xs">(always on)</span>
+                            }
+                          </label>
+                          <p class="text-muted-foreground text-xs">
+                            {{ category.description }}
+                          </p>
+                        </div>
+                      </hlm-field>
+                    }
+                  </hlm-field-group>
+                </fieldset>
+              </hlm-field-group>
 
-            <brn-separator hlmSeparator class="mb-4" />
-          }
+              <brn-separator hlmSeparator class="my-4" />
 
-          <div class="flex flex-wrap items-center gap-3">
-            @if (!showDetails()) {
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  hlmBtn
+                  variant="outline"
+                  size="sm"
+                  type="submit"
+                  [disabled]="loading()"
+                >
+                  @if (loading()) {
+                    <hlm-spinner />
+                  }
+                  Save Preferences
+                </button>
+                <button
+                  hlmBtn
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  [disabled]="loading()"
+                  (click)="rejectAll()"
+                >
+                  Reject All
+                </button>
+                <button hlmBtn size="sm" type="button" [disabled]="loading()" (click)="acceptAll()">
+                  @if (loading()) {
+                    <hlm-spinner />
+                  }
+                  Accept All
+                </button>
+              </div>
+            </form>
+          } @else {
+            <div class="flex flex-wrap items-center gap-3">
               <button hlmBtn variant="outline" size="sm" (click)="showDetails.set(true)">
                 Customize
               </button>
-            }
-
-            @if (showDetails()) {
-              <button
-                hlmBtn
-                variant="outline"
-                size="sm"
-                [disabled]="loading()"
-                (click)="savePreferences()"
-              >
+              <button hlmBtn variant="outline" size="sm" [disabled]="loading()" (click)="rejectAll()">
+                Reject All
+              </button>
+              <button hlmBtn size="sm" [disabled]="loading()" (click)="acceptAll()">
                 @if (loading()) {
                   <hlm-spinner />
                 }
-                Save Preferences
+                Accept All
               </button>
-            }
-
-            <button hlmBtn variant="outline" size="sm" [disabled]="loading()" (click)="rejectAll()">
-              Reject All
-            </button>
-
-            <button hlmBtn size="sm" [disabled]="loading()" (click)="acceptAll()">
-              @if (loading()) {
-                <hlm-spinner />
-              }
-              Accept All
-            </button>
-          </div>
+            </div>
+          }
         </div>
       </div>
     } @else if (consentRecorded()) {
@@ -164,12 +185,14 @@ export class CookieBanner implements OnDestroy {
   readonly loading = signal(false);
   readonly consentRecorded = signal(false);
 
-  readonly consent = signal<ConsentModel>({
+  readonly model = signal<ConsentModel>({
     necessary: true,
     analytics: false,
     marketing: false,
     functional: false,
   });
+
+  readonly consentForm = form(this.model);
 
   constructor() {
     this.loadConsent();
@@ -197,8 +220,8 @@ export class CookieBanner implements OnDestroy {
     this.visible.set(true);
   }
 
-  toggleCategory(id: CategoryId, checked: boolean) {
-    this.consent.update((prev) => ({ ...prev, [id]: checked }));
+  handleConsentChange(checked: boolean, id: CategoryId) {
+    this.model.update((prev) => ({ ...prev, [id]: checked }));
   }
 
   async acceptAll() {
@@ -223,7 +246,7 @@ export class CookieBanner implements OnDestroy {
       toast.error('Failed to save cookie preferences');
     } else {
       toast.success('All cookies accepted');
-      this.consent.set(allAccepted);
+      this.model.set(allAccepted);
       this.visible.set(false);
       this.consentRecorded.set(true);
     }
@@ -251,32 +274,36 @@ export class CookieBanner implements OnDestroy {
       toast.error('Failed to save cookie preferences');
     } else {
       toast.success('Non-essential cookies rejected');
-      this.consent.set(allRejected);
+      this.model.set(allRejected);
       this.visible.set(false);
       this.consentRecorded.set(true);
     }
   }
 
-  async savePreferences() {
-    this.loading.set(true);
-    const anonId = this.anonymousId.getOrCreate();
+  async savePreferences(event: Event) {
+    event.preventDefault();
 
-    const consentValue: ConsentModel = { ...this.consent(), necessary: true };
-    const { error } = await authClient.cookieConsent.setConsent({
-      anonymousId: anonId,
-      consent: consentValue,
-      consentVersion: CONSENT_VERSION,
+    submit(this.consentForm, async () => {
+      this.loading.set(true);
+      const anonId = this.anonymousId.getOrCreate();
+
+      const consentValue: ConsentModel = { ...this.model(), necessary: true };
+      const { error } = await authClient.cookieConsent.setConsent({
+        anonymousId: anonId,
+        consent: consentValue,
+        consentVersion: CONSENT_VERSION,
+      });
+
+      this.loading.set(false);
+
+      if (error) {
+        toast.error('Failed to save cookie preferences');
+      } else {
+        toast.success('Cookie preferences saved');
+        this.visible.set(false);
+        this.consentRecorded.set(true);
+      }
     });
-
-    this.loading.set(false);
-
-    if (error) {
-      toast.error('Failed to save cookie preferences');
-    } else {
-      toast.success('Cookie preferences saved');
-      this.visible.set(false);
-      this.consentRecorded.set(true);
-    }
   }
 
   /**
@@ -328,7 +355,7 @@ export class CookieBanner implements OnDestroy {
     const { data, error } = await authClient.cookieConsent.getConsent(anonymousId);
 
     if (!error && data?.consent && data.versionMatch) {
-      this.consent.set(data.consent.consent as ConsentModel);
+      this.model.set(data.consent.consent as ConsentModel);
       this.visible.set(false);
       this.consentRecorded.set(true);
       // Ensure the anonymous ID cookie is set so consent persists after logout
