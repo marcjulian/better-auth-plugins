@@ -1,5 +1,13 @@
 import { isPlatformBrowser } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  PLATFORM_ID,
+  signal,
+} from '@angular/core';
 import { email, form, FormField, minLength, required, submit } from '@angular/forms/signals';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -28,21 +36,27 @@ type AuthMode = 'sign-in' | 'sign-up';
   },
   template: `
     <div class="mx-auto max-w-md px-6">
-      <h2 class="text-3xl font-semibold tracking-tight text-gray-900 mb-6">
+      <h2 class="mb-6 text-3xl font-semibold tracking-tight text-gray-900">
         {{ isSignedIn() ? 'Account' : mode() === 'sign-in' ? 'Sign In' : 'Sign Up' }}
       </h2>
 
       @if (isSignedIn()) {
         <div class="space-y-4">
           <div class="rounded-md border p-4">
-            <p class="text-sm text-muted-foreground">Signed in as</p>
+            <p class="text-muted-foreground text-sm">Signed in as</p>
             <p class="font-medium">{{ userName() }}</p>
-            <p class="text-sm text-muted-foreground">{{ userEmail() }}</p>
+            <p class="text-muted-foreground text-sm">{{ userEmail() }}</p>
           </div>
 
           <brn-separator hlmSeparator />
 
-          <button hlmBtn variant="destructive" class="w-full" [disabled]="loading()" (click)="signOut()">
+          <button
+            hlmBtn
+            variant="destructive"
+            class="w-full"
+            [disabled]="loading()"
+            (click)="signOut()"
+          >
             @if (signingOut()) {
               <hlm-spinner />
             }
@@ -54,7 +68,14 @@ type AuthMode = 'sign-in' | 'sign-up';
           <form class="space-y-4" (submit)="onSignUp($event)">
             <hlm-field>
               <label hlmFieldLabel for="auth-name">Name</label>
-              <input hlmInput id="auth-name" type="text" placeholder="Your name" class="w-full" [formField]="signUpForm.name" />
+              <input
+                hlmInput
+                id="auth-name"
+                type="text"
+                placeholder="Your name"
+                class="w-full"
+                [formField]="signUpForm.name"
+              />
               @if (signUpForm.name().touched() && signUpForm.name().invalid()) {
                 @for (error of signUpForm.name().errors(); track error) {
                   <hlm-field-error>{{ error.message }}</hlm-field-error>
@@ -64,7 +85,14 @@ type AuthMode = 'sign-in' | 'sign-up';
 
             <hlm-field>
               <label hlmFieldLabel for="auth-email-up">Email</label>
-              <input hlmInput id="auth-email-up" type="email" placeholder="you&#64;example.com" class="w-full" [formField]="signUpForm.email" />
+              <input
+                hlmInput
+                id="auth-email-up"
+                type="email"
+                placeholder="you&#64;example.com"
+                class="w-full"
+                [formField]="signUpForm.email"
+              />
               @if (signUpForm.email().touched() && signUpForm.email().invalid()) {
                 @for (error of signUpForm.email().errors(); track error) {
                   <hlm-field-error>{{ error.message }}</hlm-field-error>
@@ -74,7 +102,14 @@ type AuthMode = 'sign-in' | 'sign-up';
 
             <hlm-field>
               <label hlmFieldLabel for="auth-password-up">Password</label>
-              <input hlmInput id="auth-password-up" type="password" placeholder="••••••••" class="w-full" [formField]="signUpForm.password" />
+              <input
+                hlmInput
+                id="auth-password-up"
+                type="password"
+                placeholder="••••••••"
+                class="w-full"
+                [formField]="signUpForm.password"
+              />
               @if (signUpForm.password().touched() && signUpForm.password().invalid()) {
                 @for (error of signUpForm.password().errors(); track error) {
                   <hlm-field-error>{{ error.message }}</hlm-field-error>
@@ -91,16 +126,25 @@ type AuthMode = 'sign-in' | 'sign-up';
 
             <brn-separator hlmSeparator />
 
-            <p class="text-center text-sm text-muted-foreground">
+            <p class="text-muted-foreground text-center text-sm">
               Already have an account?
-              <button hlmBtn variant="link" size="sm" type="button" (click)="toggleMode()">Sign In</button>
+              <button hlmBtn variant="link" size="sm" type="button" (click)="toggleMode()">
+                Sign In
+              </button>
             </p>
           </form>
         } @else {
           <form class="space-y-4" (submit)="onSignIn($event)">
             <hlm-field>
               <label hlmFieldLabel for="auth-email-in">Email</label>
-              <input hlmInput id="auth-email-in" type="email" placeholder="you&#64;example.com" class="w-full" [formField]="signInForm.email" />
+              <input
+                hlmInput
+                id="auth-email-in"
+                type="email"
+                placeholder="you&#64;example.com"
+                class="w-full"
+                [formField]="signInForm.email"
+              />
               @if (signInForm.email().touched() && signInForm.email().invalid()) {
                 @for (error of signInForm.email().errors(); track error) {
                   <hlm-field-error>{{ error.message }}</hlm-field-error>
@@ -110,7 +154,14 @@ type AuthMode = 'sign-in' | 'sign-up';
 
             <hlm-field>
               <label hlmFieldLabel for="auth-password-in">Password</label>
-              <input hlmInput id="auth-password-in" type="password" placeholder="••••••••" class="w-full" [formField]="signInForm.password" />
+              <input
+                hlmInput
+                id="auth-password-in"
+                type="password"
+                placeholder="••••••••"
+                class="w-full"
+                [formField]="signInForm.password"
+              />
               @if (signInForm.password().touched() && signInForm.password().invalid()) {
                 @for (error of signInForm.password().errors(); track error) {
                   <hlm-field-error>{{ error.message }}</hlm-field-error>
@@ -127,9 +178,11 @@ type AuthMode = 'sign-in' | 'sign-up';
 
             <brn-separator hlmSeparator />
 
-            <p class="text-center text-sm text-muted-foreground">
+            <p class="text-muted-foreground text-center text-sm">
               Don't have an account?
-              <button hlmBtn variant="link" size="sm" type="button" (click)="toggleMode()">Sign Up</button>
+              <button hlmBtn variant="link" size="sm" type="button" (click)="toggleMode()">
+                Sign Up
+              </button>
             </p>
           </form>
         }

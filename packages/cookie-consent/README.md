@@ -100,13 +100,13 @@ export const auth = betterAuth({
 
 ### Plugin Options
 
-| Option           | Type                | Default | Description                                |
-| ---------------- | ------------------- | ------- | ------------------------------------------ |
-| consentVersion   | `string`            | `"v1"`  | Current consent policy version             |
-| consent.validationSchema | `StandardSchemaV1` | — | Schema to validate consent (e.g. Zod object) |
-| onConsentChange  | `function`          | —       | Callback when consent is created/updated   |
-| rateLimit        | `object`            | —       | Rate limit for set/merge endpoints         |
-| schema           | `object`            | —       | Schema overrides for the cookieConsent table |
+| Option                   | Type               | Default | Description                                  |
+| ------------------------ | ------------------ | ------- | -------------------------------------------- |
+| consentVersion           | `string`           | `"v1"`  | Current consent policy version               |
+| consent.validationSchema | `StandardSchemaV1` | —       | Schema to validate consent (e.g. Zod object) |
+| onConsentChange          | `function`         | —       | Callback when consent is created/updated     |
+| rateLimit                | `object`           | —       | Rate limit for set/merge endpoints           |
+| schema                   | `object`           | —       | Schema overrides for the cookieConsent table |
 
 ### Validation Schema
 
@@ -204,6 +204,7 @@ The plugin provides the server and client APIs but **does not include a cookie b
 ### 1. Anonymous ID Management
 
 Store a unique anonymous ID in a cookie named `cookie-consent-anon-id`. This cookie must be:
+
 - Created when the user first interacts with the banner (e.g. `crypto.randomUUID()`)
 - Sent as a standard browser cookie so the server can read it during sign-in/sign-up hooks
 - Readable via SSR (e.g. `injectRequest()` in Analog.js)
@@ -228,6 +229,7 @@ On page load:
 ### 3. Session Change Detection
 
 Subscribe to the auth client's session state. When the session transitions from `null` → logged-in:
+
 1. Fetch consent from the server
 2. If consent exists, hide the banner and persist the `anonymousId` cookie
 3. This ensures the banner disappears immediately on login without a page reload
@@ -280,11 +282,11 @@ if (await hasConsent(ctx, 'analytics')) {
 
 ## API Endpoints
 
-| Method | Path                    | Description                                 |
-| ------ | ----------------------- | ------------------------------------------- |
-| POST   | `/cookie-consent/set`   | Create or update consent                    |
-| GET    | `/cookie-consent/get`   | Retrieve consent                            |
-| POST   | `/cookie-consent/merge` | Merge anonymous consent to user             |
+| Method | Path                    | Description                     |
+| ------ | ----------------------- | ------------------------------- |
+| POST   | `/cookie-consent/set`   | Create or update consent        |
+| GET    | `/cookie-consent/get`   | Retrieve consent                |
+| POST   | `/cookie-consent/merge` | Merge anonymous consent to user |
 
 ## Auto-Merge on Sign-In / Sign-Up
 
@@ -298,14 +300,14 @@ When the `consentVersion` option changes, the `getConsent` endpoint returns `ver
 
 The plugin creates a `cookieConsent` table:
 
-| Column         | Type     | Description                        |
-| -------------- | -------- | ---------------------------------- |
-| id             | string   | Primary key                        |
-| userId         | string?  | References user table              |
-| anonymousId    | string   | Anonymous client identifier        |
-| consent        | string   | JSON-encoded consent preferences   |
-| consentVersion | string   | Consent policy version             |
-| timestamp      | date     | When consent was recorded          |
+| Column         | Type    | Description                      |
+| -------------- | ------- | -------------------------------- |
+| id             | string  | Primary key                      |
+| userId         | string? | References user table            |
+| anonymousId    | string  | Anonymous client identifier      |
+| consent        | string  | JSON-encoded consent preferences |
+| consentVersion | string  | Consent policy version           |
+| timestamp      | date    | When consent was recorded        |
 
 ### Prisma Schema
 

@@ -157,7 +157,11 @@ export const mergeConsent = <O extends CookieConsentOptions>(_options: O) =>
         throw APIError.from('UNAUTHORIZED', COOKIE_CONSENT_ERROR_CODES.AUTHENTICATION_REQUIRED);
       }
 
-      const merged = await mergeAnonymousConsentToUser(ctx.context.adapter, userId, ctx.body.anonymousId);
+      const merged = await mergeAnonymousConsentToUser(
+        ctx.context.adapter,
+        userId,
+        ctx.body.anonymousId,
+      );
       return ctx.json({ status: true, merged });
     },
   );
@@ -170,8 +174,15 @@ export const mergeConsent = <O extends CookieConsentOptions>(_options: O) =>
  */
 export async function mergeAnonymousConsentToUser(
   adapter: {
-    findOne: <T>(opts: { model: string; where: { field: string; value: string }[] }) => Promise<T | null>;
-    update: <T>(opts: { model: string; where: { field: string; value: string }[]; update: Partial<T> }) => Promise<T | null>;
+    findOne: <T>(opts: {
+      model: string;
+      where: { field: string; value: string }[];
+    }) => Promise<T | null>;
+    update: <T>(opts: {
+      model: string;
+      where: { field: string; value: string }[];
+      update: Partial<T>;
+    }) => Promise<T | null>;
     delete: (opts: { model: string; where: { field: string; value: string }[] }) => Promise<void>;
   },
   userId: string,

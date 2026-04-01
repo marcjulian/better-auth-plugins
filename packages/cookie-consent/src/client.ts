@@ -46,9 +46,7 @@ export const cookieConsentClient = <
     },
 
     getActions($fetch, $store) {
-      const consentAtom = $store.atoms.$consent as ReturnType<
-        typeof atom<ConsentState<TConsent>>
-      >;
+      const consentAtom = $store.atoms.$consent as ReturnType<typeof atom<ConsentState<TConsent>>>;
 
       async function syncFromServer(anonymousId?: string) {
         let path = '/cookie-consent/get';

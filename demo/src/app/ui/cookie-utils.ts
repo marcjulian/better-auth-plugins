@@ -1,6 +1,6 @@
+import { injectRequest } from '@analogjs/router/tokens';
 import { isPlatformBrowser } from '@angular/common';
 import { inject, PLATFORM_ID } from '@angular/core';
-import { injectRequest } from '@analogjs/router/tokens';
 
 const ANONYMOUS_ID_COOKIE = 'cookie-consent-anon-id';
 
