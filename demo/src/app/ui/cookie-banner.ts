@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -180,8 +180,6 @@ export class CookieBanner implements OnDestroy {
     functional: false,
   });
 
-  readonly categoryIds = computed(() => this.categories.map((c) => c.id));
-
   constructor() {
     this.loadConsent();
 
@@ -218,7 +216,6 @@ export class CookieBanner implements OnDestroy {
 
     const { error } = await authClient.cookieConsent.acceptAll({
       anonymousId: anonId,
-      categories: this.categoryIds(),
       consentVersion: CONSENT_VERSION,
     });
 
@@ -237,15 +234,8 @@ export class CookieBanner implements OnDestroy {
     this.loading.set(true);
     const anonId = this.anonymousId.getOrCreate();
 
-    // Reject all: necessary stays true, everything else false
-    const consent: Record<string, boolean> = {};
-    for (const cat of this.categories) {
-      consent[cat.id] = cat.locked; // true for necessary, false for the rest
-    }
-
-    const { error } = await authClient.cookieConsent.setConsent({
+    const { error } = await authClient.cookieConsent.rejectAll({
       anonymousId: anonId,
-      consent,
       consentVersion: CONSENT_VERSION,
     });
 
@@ -255,7 +245,6 @@ export class CookieBanner implements OnDestroy {
       toast.error('Failed to save cookie preferences');
     } else {
       toast.success('Non-essential cookies rejected');
-      this.consent.set(consent);
       this.visible.set(false);
       this.consentRecorded.set(true);
     }

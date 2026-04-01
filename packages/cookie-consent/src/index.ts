@@ -3,7 +3,7 @@ import { createAuthMiddleware } from 'better-auth/api';
 import * as z from 'zod';
 
 import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
-import { getConsent, mergeConsent, setConsent } from './routes';
+import { acceptAllConsent, getConsent, mergeAnonymousConsentToUser, mergeConsent, rejectAllConsent, setConsent } from './routes';
 import { getSchema } from './schema';
 import type { Consent, CookieConsentOptions, CookieConsentRecord } from './type';
 
@@ -64,16 +64,19 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
       setConsent: setConsent(options),
       getConsent: getConsent(options),
       mergeConsent: mergeConsent(options),
+      acceptAllConsent: acceptAllConsent(options),
+      rejectAllConsent: rejectAllConsent(options),
     },
     hooks: {
       after: [
         {
-          // After sign-in or sign-up, merge anonymous consent to user
+          // After sign-in or sign-up (any method), merge anonymous consent to user.
+          // Uses prefix matching to cover all auth methods: email, social,
+          // biometrics, passkey, phone, etc.
           matcher: (context) => {
             return (
-              context.path === '/sign-in/email' ||
-              context.path === '/sign-in/social' ||
-              context.path === '/sign-up/email'
+              context.path.startsWith('/sign-in/') ||
+              context.path.startsWith('/sign-up/')
             );
           },
           handler: createAuthMiddleware(async (ctx) => {
@@ -87,44 +90,7 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
             );
             if (!anonymousId) return;
 
-            const anonymousRecord =
-              await ctx.context.adapter.findOne<CookieConsentRecord>({
-                model: 'cookieConsent',
-                where: [{ field: 'anonymousId', value: anonymousId }],
-              });
-
-            if (!anonymousRecord || anonymousRecord.userId) return;
-
-            const userRecord =
-              await ctx.context.adapter.findOne<CookieConsentRecord>({
-                model: 'cookieConsent',
-                where: [{ field: 'userId', value: userId }],
-              });
-
-            if (userRecord) {
-              // User already has consent; update with anonymous data
-              await ctx.context.adapter.update<CookieConsentRecord>({
-                model: 'cookieConsent',
-                where: [{ field: 'id', value: userRecord.id }],
-                update: {
-                  consent: anonymousRecord.consent,
-                  consentVersion: anonymousRecord.consentVersion,
-                  anonymousId,
-                  timestamp: new Date(),
-                },
-              });
-              await ctx.context.adapter.delete({
-                model: 'cookieConsent',
-                where: [{ field: 'id', value: anonymousRecord.id }],
-              });
-            } else {
-              // Attach anonymous consent to user
-              await ctx.context.adapter.update<CookieConsentRecord>({
-                model: 'cookieConsent',
-                where: [{ field: 'id', value: anonymousRecord.id }],
-                update: { userId },
-              });
-            }
+            await mergeAnonymousConsentToUser(ctx.context.adapter, userId, anonymousId);
           }),
         },
       ],
@@ -133,7 +99,7 @@ export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O =
     rateLimit: [
       {
         pathMatcher: (path) =>
-          ['/cookie-consent/set', '/cookie-consent/merge'].includes(path),
+          ['/cookie-consent/set', '/cookie-consent/merge', '/cookie-consent/accept-all', '/cookie-consent/reject-all'].includes(path),
         window: options.rateLimit?.window ?? 10,
         max: options.rateLimit?.max ?? 10,
       },

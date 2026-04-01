@@ -93,60 +93,42 @@ export const cookieConsentClient = () => {
 
           /**
            * Accept all consent categories.
+           * Categories are derived from the server's validation schema.
            */
           acceptAll: async (data: {
             anonymousId: string;
-            categories: string[];
             consentVersion: string;
           }) => {
-            const consent: Consent = {};
-            for (const cat of data.categories) {
-              consent[cat] = true;
-            }
-            const res = await $fetch<{ status: boolean }>('/cookie-consent/set', {
+            const res = await $fetch<{ status: boolean }>('/cookie-consent/accept-all', {
               method: 'POST',
               body: {
                 anonymousId: data.anonymousId,
-                consent,
                 consentVersion: data.consentVersion,
               },
             });
             if (res.data?.status) {
-              consentAtom.set({
-                consent,
-                consentVersion: data.consentVersion,
-                versionMatch: true,
-              });
+              await syncFromServer(data.anonymousId);
             }
             return res;
           },
 
           /**
            * Reject all consent categories.
+           * Categories are derived from the server's validation schema.
            */
           rejectAll: async (data: {
             anonymousId: string;
-            categories: string[];
             consentVersion: string;
           }) => {
-            const consent: Consent = {};
-            for (const cat of data.categories) {
-              consent[cat] = false;
-            }
-            const res = await $fetch<{ status: boolean }>('/cookie-consent/set', {
+            const res = await $fetch<{ status: boolean }>('/cookie-consent/reject-all', {
               method: 'POST',
               body: {
                 anonymousId: data.anonymousId,
-                consent,
                 consentVersion: data.consentVersion,
               },
             });
             if (res.data?.status) {
-              consentAtom.set({
-                consent,
-                consentVersion: data.consentVersion,
-                versionMatch: true,
-              });
+              await syncFromServer(data.anonymousId);
             }
             return res;
           },

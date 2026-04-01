@@ -17,6 +17,15 @@ const setConsentSchema = z.object({
   }),
 });
 
+const acceptOrRejectSchema = z.object({
+  anonymousId: z.string().meta({
+    description: 'Anonymous identifier for unauthenticated users',
+  }),
+  consentVersion: z.string().meta({
+    description: 'Version of the consent policy',
+  }),
+});
+
 const getConsentSchema = z.object({
   anonymousId: z.string().optional().meta({
     description: 'Anonymous identifier fallback when no session exists',
@@ -157,55 +166,153 @@ export const mergeConsent = <O extends CookieConsentOptions>(_options: O) =>
         throw APIError.from('UNAUTHORIZED', COOKIE_CONSENT_ERROR_CODES.AUTHENTICATION_REQUIRED);
       }
 
-      const { anonymousId } = ctx.body;
-
-      // Find anonymous consent record
-      const anonymousRecord = await ctx.context.adapter.findOne<CookieConsentRecord>({
-        model: 'cookieConsent',
-        where: [{ field: 'anonymousId', value: anonymousId }],
-      });
-
-      if (!anonymousRecord) {
-        return ctx.json({ status: true, merged: false });
-      }
-
-      // Check if user already has a consent record
-      const userRecord = await ctx.context.adapter.findOne<CookieConsentRecord>({
-        model: 'cookieConsent',
-        where: [{ field: 'userId', value: userId }],
-      });
-
-      if (userRecord) {
-        // User already has consent; update with latest anonymous consent data
-        await ctx.context.adapter.update<CookieConsentRecord>({
-          model: 'cookieConsent',
-          where: [{ field: 'id', value: userRecord.id }],
-          update: {
-            consent: anonymousRecord.consent,
-            consentVersion: anonymousRecord.consentVersion,
-            timestamp: new Date(),
-          },
-        });
-
-        // Remove the orphaned anonymous record
-        await ctx.context.adapter.delete({
-          model: 'cookieConsent',
-          where: [{ field: 'id', value: anonymousRecord.id }],
-        });
-      } else {
-        // Attach anonymous consent to the user
-        await ctx.context.adapter.update<CookieConsentRecord>({
-          model: 'cookieConsent',
-          where: [{ field: 'id', value: anonymousRecord.id }],
-          update: {
-            userId,
-          },
-        });
-      }
-
-      return ctx.json({ status: true, merged: true });
+      const merged = await mergeAnonymousConsentToUser(ctx.context.adapter, userId, ctx.body.anonymousId);
+      return ctx.json({ status: true, merged });
     },
   );
+
+export const acceptAllConsent = <O extends CookieConsentOptions>(options: O) =>
+  createAuthEndpoint(
+    '/cookie-consent/accept-all',
+    {
+      method: 'POST',
+      body: acceptOrRejectSchema,
+    },
+    async (ctx) => {
+      const { anonymousId, consentVersion } = ctx.body;
+
+      if (!anonymousId) {
+        throw APIError.from('BAD_REQUEST', COOKIE_CONSENT_ERROR_CODES.MISSING_ANONYMOUS_ID);
+      }
+
+      const categories = getCategoriesFromSchema(options);
+      const consent: Record<string, boolean> = {};
+      for (const cat of categories) {
+        consent[cat] = true;
+      }
+
+      const validatedConsent = validateConsent(options, consent, ctx.context.logger);
+      const session = await getSessionFromCtx(ctx);
+      const userId = session?.user?.id ?? null;
+      const existing = await findConsentRecord(ctx, userId, anonymousId);
+      const consentJson = JSON.stringify(validatedConsent);
+      const now = new Date();
+
+      if (existing) {
+        await ctx.context.adapter.update<CookieConsentRecord>({
+          model: 'cookieConsent',
+          where: [{ field: 'id', value: existing.id }],
+          update: { userId, consent: consentJson, consentVersion, timestamp: now },
+        });
+      } else {
+        await ctx.context.adapter.create<CookieConsentPayload, CookieConsentRecord>({
+          model: 'cookieConsent',
+          data: { userId, anonymousId, consent: consentJson, consentVersion, timestamp: now },
+        });
+      }
+
+      return ctx.json({ status: true });
+    },
+  );
+
+export const rejectAllConsent = <O extends CookieConsentOptions>(options: O) =>
+  createAuthEndpoint(
+    '/cookie-consent/reject-all',
+    {
+      method: 'POST',
+      body: acceptOrRejectSchema,
+    },
+    async (ctx) => {
+      const { anonymousId, consentVersion } = ctx.body;
+
+      if (!anonymousId) {
+        throw APIError.from('BAD_REQUEST', COOKIE_CONSENT_ERROR_CODES.MISSING_ANONYMOUS_ID);
+      }
+
+      const categories = getCategoriesFromSchema(options);
+      const consent: Record<string, boolean> = {};
+      for (const cat of categories) {
+        consent[cat] = false;
+      }
+
+      const validatedConsent = validateConsent(options, consent, ctx.context.logger);
+      const session = await getSessionFromCtx(ctx);
+      const userId = session?.user?.id ?? null;
+      const existing = await findConsentRecord(ctx, userId, anonymousId);
+      const consentJson = JSON.stringify(validatedConsent);
+      const now = new Date();
+
+      if (existing) {
+        await ctx.context.adapter.update<CookieConsentRecord>({
+          model: 'cookieConsent',
+          where: [{ field: 'id', value: existing.id }],
+          update: { userId, consent: consentJson, consentVersion, timestamp: now },
+        });
+      } else {
+        await ctx.context.adapter.create<CookieConsentPayload, CookieConsentRecord>({
+          model: 'cookieConsent',
+          data: { userId, anonymousId, consent: consentJson, consentVersion, timestamp: now },
+        });
+      }
+
+      return ctx.json({ status: true });
+    },
+  );
+
+/**
+ * Merge anonymous consent into a user's record.
+ * Shared between the merge endpoint and the sign-in/sign-up hook.
+ *
+ * @returns `true` if consent was merged, `false` if no anonymous record was found.
+ */
+export async function mergeAnonymousConsentToUser(
+  adapter: {
+    findOne: <T>(opts: { model: string; where: { field: string; value: string }[] }) => Promise<T | null>;
+    update: <T>(opts: { model: string; where: { field: string; value: string }[]; update: Partial<T> }) => Promise<T | null>;
+    delete: (opts: { model: string; where: { field: string; value: string }[] }) => Promise<void>;
+  },
+  userId: string,
+  anonymousId: string,
+): Promise<boolean> {
+  const anonymousRecord = await adapter.findOne<CookieConsentRecord>({
+    model: 'cookieConsent',
+    where: [{ field: 'anonymousId', value: anonymousId }],
+  });
+
+  if (!anonymousRecord || anonymousRecord.userId) return false;
+
+  const userRecord = await adapter.findOne<CookieConsentRecord>({
+    model: 'cookieConsent',
+    where: [{ field: 'userId', value: userId }],
+  });
+
+  if (userRecord) {
+    // User already has consent; update with anonymous data
+    await adapter.update<CookieConsentRecord>({
+      model: 'cookieConsent',
+      where: [{ field: 'id', value: userRecord.id }],
+      update: {
+        consent: anonymousRecord.consent,
+        consentVersion: anonymousRecord.consentVersion,
+        anonymousId,
+        timestamp: new Date(),
+      },
+    });
+    await adapter.delete({
+      model: 'cookieConsent',
+      where: [{ field: 'id', value: anonymousRecord.id }],
+    });
+  } else {
+    // Attach anonymous consent to user
+    await adapter.update<CookieConsentRecord>({
+      model: 'cookieConsent',
+      where: [{ field: 'id', value: anonymousRecord.id }],
+      update: { userId },
+    });
+  }
+
+  return true;
+}
 
 /**
  * Find a consent record by userId (preferred) or anonymousId fallback.
@@ -266,4 +373,34 @@ function validateConsent(
   }
 
   return validationResult.value as Record<string, boolean>;
+}
+
+/**
+ * Extract category keys from the validation schema.
+ * Inspects the Zod schema's `shape` (or `_def.shape`) to derive keys.
+ * Falls back to an empty array when no schema is configured.
+ */
+function getCategoriesFromSchema(options: CookieConsentOptions): string[] {
+  const schema = options.consent?.validationSchema;
+  if (!schema) return [];
+
+  // Zod schemas expose a `shape` property containing the field definitions.
+  const shape = (schema as Record<string, unknown>)['shape'] as Record<string, unknown> | undefined;
+  if (shape && typeof shape === 'object') {
+    return Object.keys(shape);
+  }
+
+  // Fallback: inspect `_def.shape` (Zod internal)
+  const def = (schema as Record<string, unknown>)['_def'] as Record<string, unknown> | undefined;
+  if (def && typeof def === 'object') {
+    const defShape = def['shape'] as Record<string, unknown> | (() => Record<string, unknown>) | undefined;
+    if (typeof defShape === 'function') {
+      return Object.keys(defShape());
+    }
+    if (defShape && typeof defShape === 'object') {
+      return Object.keys(defShape);
+    }
+  }
+
+  return [];
 }
