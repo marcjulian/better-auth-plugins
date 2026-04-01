@@ -1,4 +1,5 @@
 import type { InferOptionSchema, StandardSchemaV1 } from 'better-auth';
+import * as z from 'zod';
 
 import type { cookieConsent } from './schema';
 
@@ -6,7 +7,8 @@ import type { cookieConsent } from './schema';
  * Consent categories mapped to boolean values.
  * Each key represents a cookie category (e.g., "analytics", "marketing").
  */
-export type Consent = Record<string, boolean>;
+export type ConsentSchemaModel = z.ZodObject<Record<string, z.ZodBoolean>>;
+export type Consent = z.infer<ConsentSchemaModel>;
 
 /**
  * Options for the cookie consent plugin.
@@ -24,10 +26,7 @@ export interface CookieConsentOptions {
    * Callback invoked whenever consent changes.
    * @param data the consent record and request
    */
-  onConsentChange?: (
-    data: { consent: CookieConsentRecord },
-    request?: Request,
-  ) => Promise<void>;
+  onConsentChange?: (data: { consent: CookieConsentRecord }, request?: Request) => Promise<void>;
 
   /**
    * Rate limit configuration for consent endpoints.
@@ -59,7 +58,7 @@ export interface CookieConsentOptions {
      * object on every `setConsent` call. When omitted, the
      * consent object is accepted as-is (any `Record<string, boolean>`).
      */
-    validationSchema?: StandardSchemaV1;
+    validationSchema?: StandardSchemaV1 & ConsentSchemaModel;
   };
 }
 

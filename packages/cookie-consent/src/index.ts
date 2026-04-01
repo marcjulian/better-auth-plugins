@@ -5,7 +5,12 @@ import * as z from 'zod';
 import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
 import { getConsent, mergeAnonymousConsentToUser, mergeConsent, setConsent } from './routes';
 import { getSchema } from './schema';
-import type { Consent, CookieConsentOptions, CookieConsentRecord } from './type';
+import type {
+  Consent,
+  ConsentSchemaModel,
+  CookieConsentOptions,
+  CookieConsentRecord,
+} from './type';
 
 /**
  * Cookie name used to store the anonymous consent ID.
@@ -49,7 +54,7 @@ function parseCookieValue(
  * })
  * ```
  */
-export const defaultConsentSchema = z.object({
+export const defaultConsentSchema: ConsentSchemaModel = z.object({
   necessary: z.boolean(),
   analytics: z.boolean(),
   marketing: z.boolean(),
