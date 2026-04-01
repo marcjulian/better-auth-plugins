@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
@@ -160,8 +161,11 @@ const CATEGORIES = [
     }
   `,
 })
-export class CookieBanner {
+export class CookieBanner implements OnDestroy {
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly anonymousId = injectAnonymousId();
+  private unsubscribeSession?: () => void;
+  private wasLoggedIn = false;
 
   readonly categories = CATEGORIES;
   readonly visible = signal(false);
@@ -180,6 +184,23 @@ export class CookieBanner {
 
   constructor() {
     this.loadConsent();
+
+    // Watch for session transitions: when the user logs in (null → session),
+    // re-fetch consent from the server and update the anonymous ID cookie so
+    // that consent survives after logout + page reload.
+    if (isPlatformBrowser(this.platformId)) {
+      this.unsubscribeSession = authClient.useSession.subscribe((val) => {
+        const isLoggedIn = !!val.data;
+        if (!this.wasLoggedIn && isLoggedIn) {
+          this.onSessionAcquired();
+        }
+        this.wasLoggedIn = isLoggedIn;
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    this.unsubscribeSession?.();
   }
 
   reopenBanner() {
@@ -261,19 +282,62 @@ export class CookieBanner {
     }
   }
 
+  /**
+   * Called on initial page load. Only queries the server when there is an
+   * anonymous ID cookie or an active session — otherwise we can show the
+   * banner right away without a network round-trip.
+   */
   private async loadConsent() {
     const anonId = this.anonymousId.get();
 
-    // Always try fetching from server — it checks the authenticated session
-    // (userId) first, then falls back to anonymousId. This ensures that a
-    // signed-in user whose consent is stored on their account won't see the
-    // banner even when the anonymous cookie is absent.
-    const { data, error } = await authClient.cookieConsent.getConsent(anonId ?? undefined);
+    if (!anonId) {
+      // No anonymous cookie — check if the user has an active session
+      if (!isPlatformBrowser(this.platformId)) {
+        this.visible.set(true);
+        return;
+      }
+
+      try {
+        const { data: session } = await authClient.getSession();
+        if (!session) {
+          // Not logged in, no anonId → show banner immediately
+          this.visible.set(true);
+          return;
+        }
+      } catch {
+        this.visible.set(true);
+        return;
+      }
+    }
+
+    // Either anonId exists or user has an active session — ask server
+    await this.fetchAndApplyConsent(anonId ?? undefined);
+  }
+
+  /**
+   * Called when the user session transitions from null → logged-in.
+   * Re-fetches consent from the server and stores the anonymous ID cookie
+   * so that after the user logs out the consent can still be resolved.
+   */
+  private async onSessionAcquired() {
+    await this.fetchAndApplyConsent(this.anonymousId.get() ?? undefined);
+  }
+
+  /**
+   * Fetch consent from server and apply it to the banner state.
+   * Also persists the anonymous ID cookie so consent survives after logout.
+   */
+  private async fetchAndApplyConsent(anonymousId?: string) {
+    const { data, error } = await authClient.cookieConsent.getConsent(anonymousId);
 
     if (!error && data?.consent && data.versionMatch) {
       this.consent.set(data.consent.consent);
       this.visible.set(false);
       this.consentRecorded.set(true);
+      // Ensure the anonymous ID cookie is set so consent persists after logout
+      if (data.consent.anonymousId) {
+        this.anonymousId.set(data.consent.anonymousId);
+      }
     } else {
       this.visible.set(true);
     }

@@ -39,6 +39,16 @@ export function injectAnonymousId() {
       return parseCookie(request?.headers?.cookie, ANONYMOUS_ID_COOKIE) ?? null;
     },
 
+    /**
+     * Write a specific anonymous ID into the browser cookie.
+     * Useful for persisting the server-returned ID so consent survives logout.
+     */
+    set(id: string): void {
+      if (isPlatformBrowser(platformId)) {
+        document.cookie = `${ANONYMOUS_ID_COOKIE}=${encodeURIComponent(id)}; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`;
+      }
+    },
+
     getOrCreate(): string {
       let id = this.get();
       if (!id) {
