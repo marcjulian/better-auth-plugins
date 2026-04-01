@@ -54,12 +54,12 @@ function parseCookieValue(
  * })
  * ```
  */
-export const defaultConsentSchema: ConsentSchemaModel = z.object({
+export const defaultConsentSchema = z.object({
   necessary: z.boolean(),
   analytics: z.boolean(),
   marketing: z.boolean(),
   functional: z.boolean(),
-});
+}) satisfies ConsentSchemaModel;
 
 export const cookieConsentPlugin = <O extends CookieConsentOptions>(options: O = {} as O) => {
   return {

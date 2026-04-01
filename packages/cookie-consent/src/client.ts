@@ -2,12 +2,12 @@ import type { BetterAuthClientPlugin } from 'better-auth/client';
 import { atom } from 'nanostores';
 
 import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
-import type { cookieConsentPlugin } from './index';
+import type { Consent, cookieConsentPlugin } from './index';
 
 /**
  * Client-side consent state, kept in sync with the server.
  */
-export interface ConsentState<TConsent extends Record<string, boolean> = Record<string, boolean>> {
+export interface ConsentState<TConsent extends Consent = Consent> {
   consent: TConsent | null;
   consentVersion: string | null;
   versionMatch: boolean;
@@ -29,9 +29,7 @@ export interface ConsentState<TConsent extends Record<string, boolean> = Record<
  * });
  * ```
  */
-export const cookieConsentClient = <
-  TConsent extends Record<string, boolean> = Record<string, boolean>,
->() => {
+export const cookieConsentClient = <TConsent extends Consent = Consent>() => {
   return {
     id: 'cookie-consent',
     $InferServerPlugin: {} as ReturnType<typeof cookieConsentPlugin>,

@@ -261,7 +261,7 @@ export class CookieBanner implements OnDestroy {
     this.loading.set(true);
     const anonId = this.anonymousId.getOrCreate();
 
-    const consentValue: ConsentModel = { ...this.consent(), necessary: true };
+    const consentValue = { ...this.consent(), necessary: true };
     const { error } = await authClient.cookieConsent.setConsent({
       anonymousId: anonId,
       consent: consentValue,
@@ -328,7 +328,7 @@ export class CookieBanner implements OnDestroy {
     const { data, error } = await authClient.cookieConsent.getConsent(anonymousId);
 
     if (!error && data?.consent && data.versionMatch) {
-      this.consent.set(data.consent.consent as ConsentModel);
+      this.consent.set(data.consent.consent);
       this.visible.set(false);
       this.consentRecorded.set(true);
       // Ensure the anonymous ID cookie is set so consent persists after logout

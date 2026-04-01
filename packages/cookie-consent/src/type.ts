@@ -56,7 +56,7 @@ export interface CookieConsentOptions {
     /**
      * A Standard Schema (e.g. Zod) used to validate the consent
      * object on every `setConsent` call. When omitted, the
-     * consent object is accepted as-is (any `Record<string, boolean>`).
+     * consent object is accepted as-is (any `Consent`).
      */
     validationSchema?: StandardSchemaV1 & ConsentSchemaModel;
   };

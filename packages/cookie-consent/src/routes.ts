@@ -3,7 +3,12 @@ import { APIError, createAuthEndpoint, getSessionFromCtx } from 'better-auth/api
 import * as z from 'zod';
 
 import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
-import type { CookieConsentOptions, CookieConsentPayload, CookieConsentRecord } from './type';
+import type {
+  Consent,
+  CookieConsentOptions,
+  CookieConsentPayload,
+  CookieConsentRecord,
+} from './type';
 
 const setConsentSchema = z.object({
   anonymousId: z.string().meta({
@@ -133,7 +138,7 @@ export const getConsent = <O extends CookieConsentOptions>(options: O) =>
           id: record.id,
           userId: record.userId,
           anonymousId: record.anonymousId,
-          consent: JSON.parse(record.consent) as Record<string, boolean>,
+          consent: JSON.parse(record.consent) as Consent,
           consentVersion: record.consentVersion,
           timestamp: record.timestamp,
         },
@@ -270,9 +275,9 @@ async function findConsentRecord(
  */
 function validateConsent(
   options: CookieConsentOptions,
-  consent: Record<string, boolean>,
+  consent: Consent,
   logger: InternalLogger,
-): Record<string, boolean> {
+): Consent {
   if (!options.consent?.validationSchema) {
     return consent;
   }
@@ -287,5 +292,5 @@ function validateConsent(
     throw APIError.from('BAD_REQUEST', COOKIE_CONSENT_ERROR_CODES.INVALID_CONSENT);
   }
 
-  return validationResult.value as Record<string, boolean>;
+  return validationResult.value as Consent;
 }
