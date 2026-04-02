@@ -5,6 +5,7 @@ CREATE TABLE "lead" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "email" TEXT NOT NULL,
     "emailVerified" BOOLEAN NOT NULL DEFAULT false,
+    "verificationEmailSentAt" TIMESTAMP(3),
     "metadata" TEXT,
 
     CONSTRAINT "lead_pkey" PRIMARY KEY ("id")

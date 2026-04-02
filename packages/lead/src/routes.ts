@@ -78,9 +78,22 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
         );
         const url = `${ctx.context.baseURL}/lead/verify?token=${token}`;
 
-        await ctx.context.runInBackgroundOrAwait(
-          options.sendVerificationEmail({ email: normalizedEmail, url, token }, ctx.request),
+        const sent = await options.sendVerificationEmail(
+          {
+            lead,
+            url,
+            token,
+          },
+          ctx.request,
         );
+
+        if (sent) {
+          await ctx.context.adapter.update<Lead>({
+            model: 'lead',
+            where: [{ field: 'email', value: normalizedEmail }],
+            update: { verificationEmailSentAt: new Date() },
+          });
+        }
       }
 
       return ctx.json({
@@ -266,9 +279,22 @@ export const resend = <O extends LeadOptions>(options: O) =>
         );
         const url = `${ctx.context.baseURL}/lead/verify?token=${token}`;
 
-        await ctx.context.runInBackgroundOrAwait(
-          options.sendVerificationEmail({ email: normalizedEmail, url, token }, ctx.request),
+        const sent = await options.sendVerificationEmail(
+          {
+            lead,
+            url,
+            token,
+          },
+          ctx.request,
         );
+
+        if (sent) {
+          await ctx.context.adapter.update<Lead>({
+            model: 'lead',
+            where: [{ field: 'email', value: normalizedEmail }],
+            update: { verificationEmailSentAt: new Date() },
+          });
+        }
       }
 
       return ctx.json({

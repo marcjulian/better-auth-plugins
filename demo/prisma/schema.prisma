@@ -79,12 +79,13 @@ model Verification {
 }
 
 model Lead {
-  id            String   @id
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  email         String
-  emailVerified Boolean  @default(false)
-  metadata      String?
+  id                      String    @id
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  email                   String
+  emailVerified           Boolean   @default(false)
+  verificationEmailSentAt DateTime?
+  metadata                String?
 
   @@unique([email])
   @@map("lead")
