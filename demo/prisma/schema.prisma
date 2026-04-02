@@ -24,6 +24,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  cookieconsents CookieConsent[]
+
   @@unique([email])
   @@map("user")
 }
@@ -86,4 +88,16 @@ model Lead {
 
   @@unique([email])
   @@map("lead")
+}
+
+model CookieConsent {
+  id             String   @id
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousId    String
+  consent        String
+  consentVersion String
+  timestamp      DateTime
+
+  @@map("cookieConsent")
 }

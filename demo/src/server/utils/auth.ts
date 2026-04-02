@@ -1,4 +1,5 @@
 import { prismaAdapter } from '@better-auth/prisma-adapter';
+import { cookieConsentPlugin, defaultConsentSchema } from 'better-auth-cookie-consent';
 import { lead } from 'better-auth-lead';
 import { betterAuth } from 'better-auth/minimal';
 import * as z from 'zod';
@@ -28,6 +29,12 @@ export const auth = betterAuth({
             interests: z.array(z.string()).optional(),
           })
           .optional(),
+      },
+    }),
+    cookieConsentPlugin({
+      consentVersion: 'v1',
+      consent: {
+        validationSchema: defaultConsentSchema,
       },
     }),
   ],

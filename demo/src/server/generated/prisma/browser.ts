@@ -42,3 +42,8 @@ export type Verification = Prisma.VerificationModel
  * 
  */
 export type Lead = Prisma.LeadModel
+/**
+ * Model CookieConsent
+ * 
+ */
+export type CookieConsent = Prisma.CookieConsentModel
