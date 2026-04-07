@@ -1,7 +1,7 @@
 import type { BetterAuthClientPlugin } from 'better-auth/client';
 import { atom } from 'nanostores';
 
-import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
+// import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
 import type { Consent, cookieConsentPlugin } from './index';
 
 /**
@@ -126,6 +126,6 @@ export const cookieConsentClient = <TConsent extends Consent = Consent>() => {
       };
     },
 
-    $ERROR_CODES: COOKIE_CONSENT_ERROR_CODES,
+    // $ERROR_CODES: COOKIE_CONSENT_ERROR_CODES,
   } satisfies BetterAuthClientPlugin;
 };
