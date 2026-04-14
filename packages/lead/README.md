@@ -160,32 +160,9 @@ Additionally, you can provide an `onEmailVerified` callback to execute logic aft
 
 ### Metadata Validation
 
-To validate and parse metadata, you can pass a Standard Schema compatible schema (e.g. Zod, Valibot, ArkType).
+To validate and parse metadata, pass a Standard Schema compatible schema (e.g. Zod, Valibot, ArkType) to the `metadata.validationSchema` option. If validation fails, `subscribe` and `update` return a `400 Bad Request` with `INVALID_METADATA`.
 
-```ts
-// server/auth.ts
-import { betterAuth } from 'better-auth';
-import { lead } from 'better-auth-lead';
-import * as z from 'zod';
-
-const metadataSchema = z.object({
-  preferences: z.enum(['engineering', 'marketing', 'design']),
-});
-
-export const auth = betterAuth({
-  plugins: [
-    lead({
-      metadata: {
-        validationSchema: metadataSchema,
-      },
-    }),
-  ],
-});
-```
-
-If the schema validation fails, the API `subscribe` and `update` routes will return a `400 Bad Request` error with `INVALID_METADATA`.
-
-To propagate the metadata type to the client, pass the inferred metadata type to `leadClient`:
+To share the type with the client without bundling server code, define the schema in a shared file and import only the type on the client side:
 
 ```ts
 // shared/lead-metadata-schema.ts
@@ -196,6 +173,23 @@ export const leadMetadataSchema = z.object({
 });
 
 export type LeadMetadata = z.infer<typeof leadMetadataSchema>;
+```
+
+```ts
+// server/auth.ts
+import { betterAuth } from 'better-auth';
+import { lead } from 'better-auth-lead';
+import { leadMetadataSchema } from './shared/lead-metadata-schema';
+
+export const auth = betterAuth({
+  plugins: [
+    lead({
+      metadata: {
+        validationSchema: leadMetadataSchema,
+      },
+    }),
+  ],
+});
 ```
 
 ```ts
@@ -214,8 +208,6 @@ await authClient.lead.subscribe({
   metadata: { preferences: 'engineering' },
 });
 ```
-
-Only the `type` import is used on the client — the schema itself is not bundled.
 
 ## Schema
 
