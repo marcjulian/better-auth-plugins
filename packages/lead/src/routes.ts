@@ -1,4 +1,4 @@
-import { BASE_ERROR_CODES, type InternalLogger } from 'better-auth';
+import { BASE_ERROR_CODES, type InternalLogger, type StandardSchemaV1 } from 'better-auth';
 import { APIError, createAuthEndpoint, createEmailVerificationToken } from 'better-auth/api';
 import { jwtVerify } from 'jose';
 import type { JWTPayload, JWTVerifyResult } from 'jose';
@@ -7,6 +7,12 @@ import * as z from 'zod';
 
 import { LEAD_ERROR_CODES } from './error-codes';
 import type { Lead, LeadOptions, LeadPayload } from './type';
+
+type InferMetadata<O extends LeadOptions> = O extends {
+  metadata: { validationSchema: StandardSchemaV1<unknown, infer Out> };
+}
+  ? Out
+  : Record<string, any>;
 
 const subscribeSchema = z.object({
   email: z.string().meta({
@@ -23,6 +29,14 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
     {
       method: 'POST',
       body: subscribeSchema,
+      metadata: {
+        $Infer: {
+          body: {} as {
+            email: string;
+            metadata?: InferMetadata<O>;
+          },
+        },
+      },
     },
     async (ctx) => {
       const { email } = ctx.body;
@@ -32,7 +46,11 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
         throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.INVALID_EMAIL);
       }
 
-      const metadata = validateMetadata(options, ctx.body.metadata, ctx.context.logger);
+      const metadata = validateMetadata(
+        options,
+        ctx.body.metadata as Record<string, any> | undefined,
+        ctx.context.logger,
+      );
 
       const normalizedEmail = email.toLowerCase();
 
@@ -318,6 +336,14 @@ export const update = <O extends LeadOptions>(options: O) =>
     {
       method: 'POST',
       body: updateSchema,
+      metadata: {
+        $Infer: {
+          body: {} as {
+            id: string;
+            metadata?: InferMetadata<O>;
+          },
+        },
+      },
     },
     async (ctx) => {
       const { id } = ctx.body;
@@ -338,7 +364,11 @@ export const update = <O extends LeadOptions>(options: O) =>
         });
       }
 
-      const metadata = validateMetadata(options, ctx.body.metadata, ctx.context.logger);
+      const metadata = validateMetadata(
+        options,
+        ctx.body.metadata as Record<string, any> | undefined,
+        ctx.context.logger,
+      );
 
       await ctx.context.adapter.update<Lead>({
         model: 'lead',

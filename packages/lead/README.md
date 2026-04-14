@@ -185,6 +185,38 @@ export const auth = betterAuth({
 
 If the schema validation fails, the API `subscribe` and `update` routes will return a `400 Bad Request` error with `INVALID_METADATA`.
 
+To propagate the metadata type to the client, pass the inferred metadata type to `leadClient`:
+
+```ts
+// shared/lead-metadata-schema.ts
+import * as z from 'zod';
+
+export const leadMetadataSchema = z.object({
+  preferences: z.enum(['engineering', 'marketing', 'design']),
+});
+
+export type LeadMetadata = z.infer<typeof leadMetadataSchema>;
+```
+
+```ts
+// client/auth-client.ts
+import { createAuthClient } from 'better-auth/client';
+import { leadClient } from 'better-auth-lead/client';
+import type { LeadMetadata } from './shared/lead-metadata-schema';
+
+const authClient = createAuthClient({
+  plugins: [leadClient<LeadMetadata>()],
+});
+
+// metadata is now typed as LeadMetadata
+await authClient.lead.subscribe({
+  email: 'user@example.com',
+  metadata: { preferences: 'engineering' },
+});
+```
+
+Only the `type` import is used on the client — the schema itself is not bundled.
+
 ## Schema
 
 ### Lead
