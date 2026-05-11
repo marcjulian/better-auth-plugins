@@ -13,8 +13,9 @@ export interface LeadOptions {
      * @param lead the lead to send the verification email to
      * @param url the verification url
      * @param token the verification token
+     * @param unsubscribeUrl the one-click unsubscribe URL (RFC 8058) to include in List-Unsubscribe headers
      */
-    data: { lead: Lead; url: string; token: string },
+    data: { lead: Lead; url: string; token: string; unsubscribeUrl: string },
     request?: Request,
   ) => Promise<boolean>;
 

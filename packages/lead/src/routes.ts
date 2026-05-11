@@ -95,12 +95,14 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
           options.expiresIn ?? 3600,
         );
         const url = `${ctx.context.baseURL}/lead/verify?token=${token}`;
+        const unsubscribeUrl = `${ctx.context.baseURL}/lead/unsubscribe`;
 
         const sent = await options.sendVerificationEmail(
           {
             lead,
             url,
             token,
+            unsubscribeUrl,
           },
           ctx.request,
         );
@@ -296,12 +298,14 @@ export const resend = <O extends LeadOptions>(options: O) =>
           options.expiresIn ?? 3600,
         );
         const url = `${ctx.context.baseURL}/lead/verify?token=${token}`;
+        const unsubscribeUrl = `${ctx.context.baseURL}/lead/unsubscribe`;
 
         const sent = await options.sendVerificationEmail(
           {
             lead,
             url,
             token,
+            unsubscribeUrl,
           },
           ctx.request,
         );
