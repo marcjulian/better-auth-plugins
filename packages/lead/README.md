@@ -113,6 +113,7 @@ To enable email verification, you need to pass a function that sends a verificat
 - `lead`: The lead object.
 - `url`: The URL to send to the user which contains the token.
 - `token`: A verification token used to complete the email verification.
+- `unsubscribeUrl`: The endpoint URL for one-click unsubscribe (RFC 8058). Use this in `List-Unsubscribe` email headers.
 
 and a `request` object as the second parameter.
 
@@ -125,7 +126,7 @@ import { sendEmail } from './email'; // your email sending function
 export const auth = betterAuth({
   plugins: [
     lead({
-      sendVerificationEmail: async ({ lead, url, token }) => {
+      sendVerificationEmail: async ({ lead, url, token, unsubscribeUrl }) => {
         const { verificationEmailSentAt } = lead;
         if (
           verificationEmailSentAt &&
@@ -141,6 +142,12 @@ export const auth = betterAuth({
           to: lead.email,
           subject: 'Newsletter: Verify your email address',
           text: `Click the link to verify your email: ${url}`,
+          // One-click unsubscribe headers (RFC 8058)
+          // Supported by Gmail, Apple Mail, and Yahoo Mail.
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
         });
 
         return true;
