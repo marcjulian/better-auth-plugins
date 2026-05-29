@@ -35,6 +35,14 @@ export interface LeadOptions {
   expiresIn?: number;
 
   /**
+   * Number of seconds the unsubscribe token is valid for.
+   * Should be long-lived since users may click the link long
+   * after receiving the email.
+   * @default undefined (no expiry)
+   */
+  unsubscribeExpiresIn?: number;
+
+  /**
    * Rate limit configuration for /lead/subscribe and /lead/resend endpoints.
    */
   rateLimit?: {

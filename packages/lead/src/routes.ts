@@ -1,6 +1,6 @@
 import { BASE_ERROR_CODES, type InternalLogger, type StandardSchemaV1 } from 'better-auth';
 import { APIError, createAuthEndpoint, createEmailVerificationToken } from 'better-auth/api';
-import { jwtVerify } from 'jose';
+import { SignJWT, jwtVerify } from 'jose';
 import type { JWTPayload, JWTVerifyResult } from 'jose';
 import { JWTExpired } from 'jose/errors';
 import * as z from 'zod';
@@ -95,7 +95,12 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
           options.expiresIn ?? 3600,
         );
         const url = `${ctx.context.baseURL}/lead/verify?token=${token}`;
-        const unsubscribeUrl = `${ctx.context.baseURL}/lead/unsubscribe`;
+        const unsubscribeToken = await createUnsubscribeToken(
+          ctx.context.secret,
+          lead.id,
+          options.unsubscribeExpiresIn,
+        );
+        const unsubscribeUrl = `${ctx.context.baseURL}/lead/unsubscribe?token=${unsubscribeToken}`;
 
         const sent = await options.sendVerificationEmail(
           {
@@ -203,9 +208,9 @@ export const verify = <O extends LeadOptions>(options: O) =>
     },
   );
 
-const unsubscribeSchema = z.object({
-  id: z.string().meta({
-    description: 'The id of the lead to unsubscribe',
+const unsubscribeQuerySchema = z.object({
+  token: z.string().meta({
+    description: 'Signed unsubscribe token',
   }),
 });
 
@@ -214,10 +219,25 @@ export const unsubscribe = <O extends LeadOptions>(options: O) =>
     '/lead/unsubscribe',
     {
       method: 'POST',
-      body: unsubscribeSchema,
+      query: unsubscribeQuerySchema,
     },
     async (ctx) => {
-      const { id } = ctx.body;
+      let payload: JWTPayload;
+      try {
+        const result = await jwtVerify(
+          ctx.query.token,
+          new TextEncoder().encode(ctx.context.secret),
+          { algorithms: ['HS256'] },
+        );
+        payload = result.payload;
+      } catch (e) {
+        if (e instanceof JWTExpired) {
+          throw APIError.from('UNAUTHORIZED', LEAD_ERROR_CODES.TOKEN_EXPIRED);
+        }
+        throw APIError.from('UNAUTHORIZED', LEAD_ERROR_CODES.INVALID_TOKEN);
+      }
+
+      const id = payload['id'] as string;
 
       const lead = await ctx.context.adapter.findOne<Lead>({
         model: 'lead',
@@ -298,7 +318,12 @@ export const resend = <O extends LeadOptions>(options: O) =>
           options.expiresIn ?? 3600,
         );
         const url = `${ctx.context.baseURL}/lead/verify?token=${token}`;
-        const unsubscribeUrl = `${ctx.context.baseURL}/lead/unsubscribe`;
+        const unsubscribeToken = await createUnsubscribeToken(
+          ctx.context.secret,
+          lead.id,
+          options.unsubscribeExpiresIn,
+        );
+        const unsubscribeUrl = `${ctx.context.baseURL}/lead/unsubscribe?token=${unsubscribeToken}`;
 
         const sent = await options.sendVerificationEmail(
           {
@@ -392,6 +417,14 @@ export const update = <O extends LeadOptions>(options: O) =>
       });
     },
   );
+
+async function createUnsubscribeToken(secret: string, leadId: string, expiresIn?: number) {
+  const jwt = new SignJWT({ id: leadId }).setProtectedHeader({ alg: 'HS256' }).setIssuedAt();
+  if (expiresIn !== undefined) {
+    jwt.setExpirationTime(Math.floor(Date.now() / 1000) + expiresIn);
+  }
+  return jwt.sign(new TextEncoder().encode(secret));
+}
 
 function validateMetadata(
   options: LeadOptions,
