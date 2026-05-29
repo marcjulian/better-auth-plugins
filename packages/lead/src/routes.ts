@@ -87,7 +87,7 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
         }
       }
 
-      if (options.sendVerificationEmail && lead && !lead.emailVerified) {
+      if (options.sendConfirmationEmail && lead && !lead.confirmed) {
         const token = await createEmailVerificationToken(
           ctx.context.secret,
           normalizedEmail,
@@ -102,9 +102,10 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
         );
         const unsubscribeUrl = `${ctx.context.baseURL}/lead/unsubscribe?token=${unsubscribeToken}`;
 
-        const sent = await options.sendVerificationEmail(
+        const sent = await options.sendConfirmationEmail(
           {
             lead,
+            email: normalizedEmail,
             url,
             token,
             unsubscribeUrl,
@@ -173,7 +174,7 @@ export const verify = <O extends LeadOptions>(options: O) =>
         });
       }
 
-      if (lead.emailVerified) {
+      if (lead.confirmed) {
         return ctx.json({
           status: true,
         });
@@ -188,7 +189,7 @@ export const verify = <O extends LeadOptions>(options: O) =>
           },
         ],
         update: {
-          emailVerified: true,
+          confirmed: true,
         },
       });
 
@@ -198,8 +199,8 @@ export const verify = <O extends LeadOptions>(options: O) =>
         });
       }
 
-      if (options.onEmailVerified) {
-        await ctx.context.runInBackgroundOrAwait(options.onEmailVerified({ lead }, ctx.request));
+      if (options.onConfirmed) {
+        await ctx.context.runInBackgroundOrAwait(options.onConfirmed({ lead }, ctx.request));
       }
 
       return ctx.json({
@@ -315,7 +316,7 @@ export const resend = <O extends LeadOptions>(options: O) =>
         });
       }
 
-      if (options.sendVerificationEmail && lead && !lead.emailVerified) {
+      if (options.sendConfirmationEmail && lead && !lead.confirmed) {
         const token = await createEmailVerificationToken(
           ctx.context.secret,
           normalizedEmail,
@@ -330,9 +331,10 @@ export const resend = <O extends LeadOptions>(options: O) =>
         );
         const unsubscribeUrl = `${ctx.context.baseURL}/lead/unsubscribe?token=${unsubscribeToken}`;
 
-        const sent = await options.sendVerificationEmail(
+        const sent = await options.sendConfirmationEmail(
           {
             lead,
+            email: normalizedEmail,
             url,
             token,
             unsubscribeUrl,
