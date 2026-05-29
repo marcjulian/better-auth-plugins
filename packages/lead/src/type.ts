@@ -8,20 +8,21 @@ export interface LeadOptions {
    * @param data the data object
    * @param request the request object
    */
-  sendVerificationEmail?: (
+  sendConfirmationEmail?: (
     /**
-     * @param lead the lead to send the verification email to
-     * @param url the verification url
-     * @param token the verification token
+     * @param lead the lead to send the confirmation email to
+     * @param email the email address to send the confirmation to
+     * @param url the confirmation url
+     * @param token the confirmation token
      * @param unsubscribeUrl the one-click unsubscribe URL (RFC 8058) to include in List-Unsubscribe headers
      */
-    data: { lead: Lead; url: string; token: string; unsubscribeUrl: string },
+    data: { lead: Lead; email: string; url: string; token: string; unsubscribeUrl: string },
     request?: Request,
   ) => Promise<boolean>;
 
-  onEmailVerified?: (
+  onConfirmed?: (
     /**
-     * @param lead the lead that was verified
+     * @param lead the lead that confirmed their subscription
      */
     data: { lead: Lead },
     request?: Request,
@@ -78,16 +79,19 @@ export interface Lead {
 
   updatedAt: Date;
 
-  email: string;
+  email: string | null;
 
-  emailVerified: boolean;
+  userId: string | null;
 
-  verificationEmailSentAt: Date | null;
+  confirmed: boolean;
+
+  confirmationSentAt: Date | null;
 
   metadata?: string;
 }
 
-export type LeadPayload = Omit<
-  Lead,
-  'id' | 'createdAt' | 'updatedAt' | 'emailVerified' | 'verificationEmailSentAt'
->;
+export type LeadPayload = {
+  email?: string | null;
+  userId?: string | null;
+  metadata?: string;
+};

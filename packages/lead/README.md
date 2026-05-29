@@ -110,13 +110,13 @@ const { data, error } = await authClient.lead.update({
 });
 ```
 
-### Email Verification
+### Email Confirmation
 
-To enable email verification, you need to pass a function that sends a verification email with a link. The `sendVerificationEmail` takes a data object with the following properties:
+To enable double opt-in email confirmation, pass a `sendConfirmationEmail` function. It receives a data object with:
 
 - `lead`: The lead object.
-- `url`: The URL to send to the user which contains the token.
-- `token`: A verification token used to complete the email verification.
+- `url`: The URL containing the confirmation token to send to the user.
+- `token`: The confirmation token used to complete the verification.
 - `unsubscribeUrl`: The endpoint URL for one-click unsubscribe (RFC 8058). Use this in `List-Unsubscribe` email headers.
 
 and a `request` object as the second parameter.
@@ -130,22 +130,22 @@ import { sendEmail } from './email'; // your email sending function
 export const auth = betterAuth({
   plugins: [
     lead({
-      sendVerificationEmail: async ({ lead, url, token, unsubscribeUrl }) => {
-        const { verificationEmailSentAt } = lead;
+      sendConfirmationEmail: async ({ lead, url, token, unsubscribeUrl }) => {
+        const { confirmationSentAt } = lead;
         if (
-          verificationEmailSentAt &&
-          Date.now() - verificationEmailSentAt.getTime() < 60 * 1000 // 1 minute
+          confirmationSentAt &&
+          Date.now() - confirmationSentAt.getTime() < 60 * 1000 // 1 minute
         ) {
           console.log(
-            `Skipping sending verification email to ${lead.email} because a recent email was already sent.`,
+            `Skipping sending confirmation email to ${lead.email} because a recent email was already sent.`,
           );
           return false;
         }
 
         void sendEmail({
           to: lead.email,
-          subject: 'Newsletter: Verify your email address',
-          text: `Click the link to verify your email: ${url}`,
+          subject: 'Newsletter: Confirm your subscription',
+          text: `Click the link to confirm your subscription: ${url}`,
           // One-click unsubscribe headers (RFC 8058)
           // Supported by Gmail, Apple Mail, and Yahoo Mail.
           headers: {
@@ -156,9 +156,9 @@ export const auth = betterAuth({
 
         return true;
       },
-      onEmailVerified: async ({ lead }) => {
-        // do something when a lead's email is verified
-        console.log(`Lead ${lead.email} has been verified!`);
+      onConfirmed: async ({ lead }) => {
+        // do something when a lead confirms their subscription
+        console.log(`Lead ${lead.email} has confirmed their subscription!`);
       },
     }),
   ],
@@ -167,7 +167,7 @@ export const auth = betterAuth({
 
 > Avoid awaiting the email sending to prevent timing attacks.
 
-Additionally, you can provide an `onEmailVerified` callback to execute logic after a lead's email is verified.
+Additionally, you can provide an `onConfirmed` callback to execute logic after a lead confirms their subscription.
 
 ### Metadata Validation
 
@@ -226,29 +226,34 @@ await authClient.lead.subscribe({
 
 Table name: `lead`
 
-|  Field                  |  Type   |  Key   |  Description                                      |
-| ----------------------- | ------- | ------ | ------------------------------------------------- |
-| id                      | string  | pk     | Unique identifier for each lead                   |
-| email                   | string  | unique | Email address of the lead                         |
-| emailVerified           | boolean |        | Whether the email is verified                     |
-| verificationEmailSentAt | Date    | ?      | Timestamp of when the verification email was sent |
-| metadata                | json    | ?      | Additional data about the lead                    |
-| createdAt               | date    |        | Timestamp of lead creation                        |
-| updatedAt               | date    |        | Timestamp of last update                          |
+| Field              | Type    | Key    | Description                                       |
+| ------------------ | ------- | ------ | ------------------------------------------------- |
+| id                 | string  | pk     | Unique identifier for each lead                   |
+| email              | string? | unique | Email address of the lead (optional)              |
+| userId             | string? | unique | ID of an associated better-auth user (optional)   |
+| confirmed          | boolean |        | Whether the lead has confirmed their subscription |
+| confirmationSentAt | Date    | ?      | Timestamp of when the confirmation email was sent |
+| metadata           | json    | ?      | Additional data about the lead                    |
+| createdAt          | date    |        | Timestamp of lead creation                        |
+| updatedAt          | date    |        | Timestamp of last update                          |
 
 #### Prisma
 
 ```prisma
 model Lead {
-  id                      String    @id
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
-  email                   String
-  emailVerified           Boolean   @default(false)
-  verificationEmailSentAt DateTime?
-  metadata                String?
+  id                 String    @id
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  email              String?
+  userId             String?
+  confirmed          Boolean   @default(false)
+  confirmationSentAt DateTime?
+  metadata           String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([email])
+  @@unique([userId])
+  @@index([userId])
   @@map("lead")
 }
 ```
