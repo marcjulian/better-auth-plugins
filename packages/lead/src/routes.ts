@@ -220,6 +220,11 @@ export const unsubscribe = <O extends LeadOptions>(options: O) =>
     {
       method: 'POST',
       query: unsubscribeQuerySchema,
+      metadata: {
+        // Empty array overrides the router-level JSON-only restriction,
+        // allowing POST with no body (required for RFC 8058 one-click unsubscribe).
+        allowedMediaTypes: [],
+      },
     },
     async (ctx) => {
       let payload: JWTPayload;

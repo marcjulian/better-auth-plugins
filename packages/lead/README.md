@@ -80,9 +80,13 @@ await authClient.lead.verify({
 
 ### Unsubscribe
 
+The unsubscribe endpoint is designed for [RFC 8058](https://www.rfc-editor.org/rfc/rfc8058) one-click unsubscribe. The signed `token` is embedded in the `unsubscribeUrl` provided to `sendVerificationEmail` and should be used in `List-Unsubscribe` email headers — email clients (Gmail, Apple Mail, Yahoo Mail) will POST to this URL automatically when the user clicks "Unsubscribe".
+
 ```ts
-// POST /lead/unsubscribe
-const { data, error } = await authClient.lead.unsubscribe({ id: 'lead-id' });
+// POST /lead/unsubscribe?token=<signed-token>
+const { data, error } = await authClient.lead.unsubscribe({
+  query: { token },
+});
 ```
 
 ### Resend
