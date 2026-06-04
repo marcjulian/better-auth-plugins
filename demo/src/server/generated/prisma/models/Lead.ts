@@ -29,8 +29,9 @@ export type LeadMinAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   email: string | null
-  emailVerified: boolean | null
-  verificationEmailSentAt: Date | null
+  userId: string | null
+  confirmed: boolean | null
+  confirmationSentAt: Date | null
   metadata: string | null
 }
 
@@ -39,8 +40,9 @@ export type LeadMaxAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   email: string | null
-  emailVerified: boolean | null
-  verificationEmailSentAt: Date | null
+  userId: string | null
+  confirmed: boolean | null
+  confirmationSentAt: Date | null
   metadata: string | null
 }
 
@@ -49,8 +51,9 @@ export type LeadCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   email: number
-  emailVerified: number
-  verificationEmailSentAt: number
+  userId: number
+  confirmed: number
+  confirmationSentAt: number
   metadata: number
   _all: number
 }
@@ -61,8 +64,9 @@ export type LeadMinAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   email?: true
-  emailVerified?: true
-  verificationEmailSentAt?: true
+  userId?: true
+  confirmed?: true
+  confirmationSentAt?: true
   metadata?: true
 }
 
@@ -71,8 +75,9 @@ export type LeadMaxAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   email?: true
-  emailVerified?: true
-  verificationEmailSentAt?: true
+  userId?: true
+  confirmed?: true
+  confirmationSentAt?: true
   metadata?: true
 }
 
@@ -81,8 +86,9 @@ export type LeadCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   email?: true
-  emailVerified?: true
-  verificationEmailSentAt?: true
+  userId?: true
+  confirmed?: true
+  confirmationSentAt?: true
   metadata?: true
   _all?: true
 }
@@ -163,9 +169,10 @@ export type LeadGroupByOutputType = {
   id: string
   createdAt: Date
   updatedAt: Date
-  email: string
-  emailVerified: boolean
-  verificationEmailSentAt: Date | null
+  email: string | null
+  userId: string | null
+  confirmed: boolean
+  confirmationSentAt: Date | null
   metadata: string | null
   _count: LeadCountAggregateOutputType | null
   _min: LeadMinAggregateOutputType | null
@@ -194,42 +201,49 @@ export type LeadWhereInput = {
   id?: Prisma.StringFilter<"Lead"> | string
   createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
-  email?: Prisma.StringFilter<"Lead"> | string
-  emailVerified?: Prisma.BoolFilter<"Lead"> | boolean
-  verificationEmailSentAt?: Prisma.DateTimeNullableFilter<"Lead"> | Date | string | null
+  email?: Prisma.StringNullableFilter<"Lead"> | string | null
+  userId?: Prisma.StringNullableFilter<"Lead"> | string | null
+  confirmed?: Prisma.BoolFilter<"Lead"> | boolean
+  confirmationSentAt?: Prisma.DateTimeNullableFilter<"Lead"> | Date | string | null
   metadata?: Prisma.StringNullableFilter<"Lead"> | string | null
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type LeadOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  email?: Prisma.SortOrder
-  emailVerified?: Prisma.SortOrder
-  verificationEmailSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  confirmed?: Prisma.SortOrder
+  confirmationSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type LeadWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
+  userId?: string
   AND?: Prisma.LeadWhereInput | Prisma.LeadWhereInput[]
   OR?: Prisma.LeadWhereInput[]
   NOT?: Prisma.LeadWhereInput | Prisma.LeadWhereInput[]
   createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Lead"> | Date | string
-  emailVerified?: Prisma.BoolFilter<"Lead"> | boolean
-  verificationEmailSentAt?: Prisma.DateTimeNullableFilter<"Lead"> | Date | string | null
+  confirmed?: Prisma.BoolFilter<"Lead"> | boolean
+  confirmationSentAt?: Prisma.DateTimeNullableFilter<"Lead"> | Date | string | null
   metadata?: Prisma.StringNullableFilter<"Lead"> | string | null
-}, "id" | "email">
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+}, "id" | "email" | "userId">
 
 export type LeadOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  email?: Prisma.SortOrder
-  emailVerified?: Prisma.SortOrder
-  verificationEmailSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  confirmed?: Prisma.SortOrder
+  confirmationSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.LeadCountOrderByAggregateInput
   _max?: Prisma.LeadMaxOrderByAggregateInput
@@ -243,9 +257,10 @@ export type LeadScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Lead"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Lead"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Lead"> | Date | string
-  email?: Prisma.StringWithAggregatesFilter<"Lead"> | string
-  emailVerified?: Prisma.BoolWithAggregatesFilter<"Lead"> | boolean
-  verificationEmailSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Lead"> | Date | string | null
+  email?: Prisma.StringNullableWithAggregatesFilter<"Lead"> | string | null
+  userId?: Prisma.StringNullableWithAggregatesFilter<"Lead"> | string | null
+  confirmed?: Prisma.BoolWithAggregatesFilter<"Lead"> | boolean
+  confirmationSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Lead"> | Date | string | null
   metadata?: Prisma.StringNullableWithAggregatesFilter<"Lead"> | string | null
 }
 
@@ -253,19 +268,21 @@ export type LeadCreateInput = {
   id: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  email: string
-  emailVerified?: boolean
-  verificationEmailSentAt?: Date | string | null
+  email?: string | null
+  confirmed?: boolean
+  confirmationSentAt?: Date | string | null
   metadata?: string | null
+  user?: Prisma.UserCreateNestedOneWithoutLeadInput
 }
 
 export type LeadUncheckedCreateInput = {
   id: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  email: string
-  emailVerified?: boolean
-  verificationEmailSentAt?: Date | string | null
+  email?: string | null
+  userId?: string | null
+  confirmed?: boolean
+  confirmationSentAt?: Date | string | null
   metadata?: string | null
 }
 
@@ -273,19 +290,21 @@ export type LeadUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verificationEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  confirmationSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user?: Prisma.UserUpdateOneWithoutLeadNestedInput
 }
 
 export type LeadUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verificationEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  confirmationSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -293,9 +312,10 @@ export type LeadCreateManyInput = {
   id: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  email: string
-  emailVerified?: boolean
-  verificationEmailSentAt?: Date | string | null
+  email?: string | null
+  userId?: string | null
+  confirmed?: boolean
+  confirmationSentAt?: Date | string | null
   metadata?: string | null
 }
 
@@ -303,9 +323,9 @@ export type LeadUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verificationEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  confirmationSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -313,10 +333,16 @@ export type LeadUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  verificationEmailSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  confirmationSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type LeadNullableScalarRelationFilter = {
+  is?: Prisma.LeadWhereInput | null
+  isNot?: Prisma.LeadWhereInput | null
 }
 
 export type LeadCountOrderByAggregateInput = {
@@ -324,8 +350,9 @@ export type LeadCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  emailVerified?: Prisma.SortOrder
-  verificationEmailSentAt?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  confirmed?: Prisma.SortOrder
+  confirmationSentAt?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
 }
 
@@ -334,8 +361,9 @@ export type LeadMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  emailVerified?: Prisma.SortOrder
-  verificationEmailSentAt?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  confirmed?: Prisma.SortOrder
+  confirmationSentAt?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
 }
 
@@ -344,9 +372,98 @@ export type LeadMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   email?: Prisma.SortOrder
-  emailVerified?: Prisma.SortOrder
-  verificationEmailSentAt?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
+  confirmed?: Prisma.SortOrder
+  confirmationSentAt?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
+}
+
+export type LeadCreateNestedOneWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.LeadCreateOrConnectWithoutUserInput
+  connect?: Prisma.LeadWhereUniqueInput
+}
+
+export type LeadUncheckedCreateNestedOneWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.LeadCreateOrConnectWithoutUserInput
+  connect?: Prisma.LeadWhereUniqueInput
+}
+
+export type LeadUpdateOneWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.LeadCreateOrConnectWithoutUserInput
+  upsert?: Prisma.LeadUpsertWithoutUserInput
+  disconnect?: Prisma.LeadWhereInput | boolean
+  delete?: Prisma.LeadWhereInput | boolean
+  connect?: Prisma.LeadWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LeadUpdateToOneWithWhereWithoutUserInput, Prisma.LeadUpdateWithoutUserInput>, Prisma.LeadUncheckedUpdateWithoutUserInput>
+}
+
+export type LeadUncheckedUpdateOneWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput>
+  connectOrCreate?: Prisma.LeadCreateOrConnectWithoutUserInput
+  upsert?: Prisma.LeadUpsertWithoutUserInput
+  disconnect?: Prisma.LeadWhereInput | boolean
+  delete?: Prisma.LeadWhereInput | boolean
+  connect?: Prisma.LeadWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LeadUpdateToOneWithWhereWithoutUserInput, Prisma.LeadUpdateWithoutUserInput>, Prisma.LeadUncheckedUpdateWithoutUserInput>
+}
+
+export type LeadCreateWithoutUserInput = {
+  id: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  email?: string | null
+  confirmed?: boolean
+  confirmationSentAt?: Date | string | null
+  metadata?: string | null
+}
+
+export type LeadUncheckedCreateWithoutUserInput = {
+  id: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  email?: string | null
+  confirmed?: boolean
+  confirmationSentAt?: Date | string | null
+  metadata?: string | null
+}
+
+export type LeadCreateOrConnectWithoutUserInput = {
+  where: Prisma.LeadWhereUniqueInput
+  create: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput>
+}
+
+export type LeadUpsertWithoutUserInput = {
+  update: Prisma.XOR<Prisma.LeadUpdateWithoutUserInput, Prisma.LeadUncheckedUpdateWithoutUserInput>
+  create: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput>
+  where?: Prisma.LeadWhereInput
+}
+
+export type LeadUpdateToOneWithWhereWithoutUserInput = {
+  where?: Prisma.LeadWhereInput
+  data: Prisma.XOR<Prisma.LeadUpdateWithoutUserInput, Prisma.LeadUncheckedUpdateWithoutUserInput>
+}
+
+export type LeadUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  confirmationSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type LeadUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  confirmationSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -356,9 +473,11 @@ export type LeadSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   email?: boolean
-  emailVerified?: boolean
-  verificationEmailSentAt?: boolean
+  userId?: boolean
+  confirmed?: boolean
+  confirmationSentAt?: boolean
   metadata?: boolean
+  user?: boolean | Prisma.Lead$userArgs<ExtArgs>
 }, ExtArgs["result"]["lead"]>
 
 export type LeadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -366,9 +485,11 @@ export type LeadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   email?: boolean
-  emailVerified?: boolean
-  verificationEmailSentAt?: boolean
+  userId?: boolean
+  confirmed?: boolean
+  confirmationSentAt?: boolean
   metadata?: boolean
+  user?: boolean | Prisma.Lead$userArgs<ExtArgs>
 }, ExtArgs["result"]["lead"]>
 
 export type LeadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -376,9 +497,11 @@ export type LeadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   email?: boolean
-  emailVerified?: boolean
-  verificationEmailSentAt?: boolean
+  userId?: boolean
+  confirmed?: boolean
+  confirmationSentAt?: boolean
   metadata?: boolean
+  user?: boolean | Prisma.Lead$userArgs<ExtArgs>
 }, ExtArgs["result"]["lead"]>
 
 export type LeadSelectScalar = {
@@ -386,23 +509,36 @@ export type LeadSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   email?: boolean
-  emailVerified?: boolean
-  verificationEmailSentAt?: boolean
+  userId?: boolean
+  confirmed?: boolean
+  confirmationSentAt?: boolean
   metadata?: boolean
 }
 
-export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "emailVerified" | "verificationEmailSentAt" | "metadata", ExtArgs["result"]["lead"]>
+export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "userId" | "confirmed" | "confirmationSentAt" | "metadata", ExtArgs["result"]["lead"]>
+export type LeadInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.Lead$userArgs<ExtArgs>
+}
+export type LeadIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.Lead$userArgs<ExtArgs>
+}
+export type LeadIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.Lead$userArgs<ExtArgs>
+}
 
 export type $LeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Lead"
-  objects: {}
+  objects: {
+    user: Prisma.$UserPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     createdAt: Date
     updatedAt: Date
-    email: string
-    emailVerified: boolean
-    verificationEmailSentAt: Date | null
+    email: string | null
+    userId: string | null
+    confirmed: boolean
+    confirmationSentAt: Date | null
     metadata: string | null
   }, ExtArgs["result"]["lead"]>
   composites: {}
@@ -798,6 +934,7 @@ readonly fields: LeadFieldRefs;
  */
 export interface Prisma__LeadClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  user<T extends Prisma.Lead$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Lead$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -831,8 +968,9 @@ export interface LeadFieldRefs {
   readonly createdAt: Prisma.FieldRef<"Lead", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Lead", 'DateTime'>
   readonly email: Prisma.FieldRef<"Lead", 'String'>
-  readonly emailVerified: Prisma.FieldRef<"Lead", 'Boolean'>
-  readonly verificationEmailSentAt: Prisma.FieldRef<"Lead", 'DateTime'>
+  readonly userId: Prisma.FieldRef<"Lead", 'String'>
+  readonly confirmed: Prisma.FieldRef<"Lead", 'Boolean'>
+  readonly confirmationSentAt: Prisma.FieldRef<"Lead", 'DateTime'>
   readonly metadata: Prisma.FieldRef<"Lead", 'String'>
 }
     
@@ -850,6 +988,10 @@ export type LeadFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the Lead
    */
   omit?: Prisma.LeadOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
   /**
    * Filter, which Lead to fetch.
    */
@@ -869,6 +1011,10 @@ export type LeadFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.LeadOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
+  /**
    * Filter, which Lead to fetch.
    */
   where: Prisma.LeadWhereUniqueInput
@@ -886,6 +1032,10 @@ export type LeadFindFirstArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Omit specific fields from the Lead
    */
   omit?: Prisma.LeadOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
   /**
    * Filter, which Lead to fetch.
    */
@@ -935,6 +1085,10 @@ export type LeadFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.LeadOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
+  /**
    * Filter, which Lead to fetch.
    */
   where?: Prisma.LeadWhereInput
@@ -983,6 +1137,10 @@ export type LeadFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    */
   omit?: Prisma.LeadOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
+  /**
    * Filter, which Leads to fetch.
    */
   where?: Prisma.LeadWhereInput
@@ -1026,6 +1184,10 @@ export type LeadCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    */
   omit?: Prisma.LeadOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
+  /**
    * The data needed to create a Lead.
    */
   data: Prisma.XOR<Prisma.LeadCreateInput, Prisma.LeadUncheckedCreateInput>
@@ -1059,6 +1221,10 @@ export type LeadCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    */
   data: Prisma.LeadCreateManyInput | Prisma.LeadCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1073,6 +1239,10 @@ export type LeadUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    * Omit specific fields from the Lead
    */
   omit?: Prisma.LeadOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
   /**
    * The data needed to update a Lead.
    */
@@ -1125,6 +1295,10 @@ export type LeadUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many Leads to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1139,6 +1313,10 @@ export type LeadUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    * Omit specific fields from the Lead
    */
   omit?: Prisma.LeadOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
   /**
    * The filter to search for the Lead to update in case it exists.
    */
@@ -1166,6 +1344,10 @@ export type LeadDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    */
   omit?: Prisma.LeadOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
+  /**
    * Filter which Lead to delete.
    */
   where: Prisma.LeadWhereUniqueInput
@@ -1186,6 +1368,25 @@ export type LeadDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
+ * Lead.user
+ */
+export type Lead$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
  * Lead without action
  */
 export type LeadDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1197,4 +1398,8 @@ export type LeadDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Lead
    */
   omit?: Prisma.LeadOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
 }

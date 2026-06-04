@@ -15,23 +15,23 @@ export const auth = betterAuth({
   },
   plugins: [
     lead({
-      sendVerificationEmail: async ({ lead, url, token }) => {
-        const { verificationEmailSentAt } = lead;
+      sendConfirmationEmail: async ({ lead, email, url, token }) => {
+        const { confirmationSentAt } = lead;
         if (
-          verificationEmailSentAt &&
-          Date.now() - verificationEmailSentAt.getTime() < 60 * 1000 // 1 minute
+          confirmationSentAt &&
+          Date.now() - confirmationSentAt.getTime() < 60 * 1000 // 1 minute
         ) {
           console.log(
-            `Skipping sending verification email to ${lead.email} because a recent email was already sent.`,
+            `Skipping sending confirmation email to ${lead.email} because a recent email was already sent.`,
           );
           return false;
         }
 
-        console.log({ email: lead.email, url, token });
+        console.log({ lead, email, url, token });
 
         return true;
       },
-      onEmailVerified: async ({ lead }) => {
+      onConfirmed: async ({ lead }) => {
         console.log({ lead });
       },
       metadata: {
