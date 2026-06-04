@@ -8,7 +8,7 @@ import { HlmRadioGroupImports } from '@spartan-ng/helm/radio-group';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { toast } from 'ngx-sonner';
 
-import { authClient } from '../auth-client';
+import { injectAuthClient } from '../auth/auth-client';
 
 @Component({
   selector: 'ba-newsletter-metadata',
@@ -32,7 +32,7 @@ import { authClient } from '../auth-client';
       >
         Want product news and updates? Sign up for our newsletter.
       </h2>
-      <form class="max-w-md lg:col-span-5" (submit)="subscribe($event)">
+      <form novalidate class="max-w-md lg:col-span-5" (submit)="subscribe($event)">
         <hlm-field-group>
           <hlm-field>
             <input hlmInput type="email" placeholder="Enter your email" [formField]="form.email" />
@@ -98,6 +98,8 @@ import { authClient } from '../auth-client';
   `,
 })
 export class NewsletterMetadata {
+  private authClient = injectAuthClient();
+
   roles = [
     { id: 'ceo', label: 'CEO' },
     { id: 'cto', label: 'CTO' },
@@ -145,7 +147,7 @@ export class NewsletterMetadata {
       this.loading.set(true);
       const { email, role, interests } = this.model();
 
-      const { data, error } = await authClient.lead.subscribe({
+      const { data, error } = await this.authClient.lead.subscribe({
         email,
         metadata: {
           role,

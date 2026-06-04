@@ -29,7 +29,7 @@ export interface LeadOptions {
   ) => Promise<void>;
 
   /**
-   * Number of seconds the verification token is
+   * Number of seconds the confirmation token is
    * valid for.
    * @default 3600 seconds (1 hour)
    */

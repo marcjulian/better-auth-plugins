@@ -56,6 +56,8 @@ const authClient = createAuthClient({
 
 ### Subscribe
 
+Provide an `email` to subscribe an anonymous lead:
+
 ```ts
 // POST /lead/subscribe
 const { data, error } = await authClient.lead.subscribe({
@@ -66,6 +68,19 @@ const { data, error } = await authClient.lead.subscribe({
   },
 });
 ```
+
+Or omit `email` to subscribe the currently authenticated user. The lead is associated to the session user's `id` (a valid session cookie is required):
+
+```ts
+// POST /lead/subscribe
+const { data, error } = await authClient.lead.subscribe({
+  metadata: {
+    preferences: 'engineering',
+  },
+});
+```
+
+If neither `email` nor an active session is provided, the endpoint responds with `400 Bad Request` (`EMAIL_OR_SESSION_REQUIRED`).
 
 ### Verify
 
@@ -80,7 +95,7 @@ await authClient.lead.verify({
 
 ### Unsubscribe
 
-The unsubscribe endpoint is designed for [RFC 8058](https://www.rfc-editor.org/rfc/rfc8058) one-click unsubscribe. The signed `token` is embedded in the `unsubscribeUrl` provided to `sendVerificationEmail` and should be used in `List-Unsubscribe` email headers — email clients (Gmail, Apple Mail, Yahoo Mail) will POST to this URL automatically when the user clicks "Unsubscribe".
+The unsubscribe endpoint is designed for [RFC 8058](https://www.rfc-editor.org/rfc/rfc8058) one-click unsubscribe. The signed `token` is embedded in the `unsubscribeUrl` provided to `sendConfirmationEmail` and should be used in `List-Unsubscribe` email headers — email clients (Gmail, Apple Mail, Yahoo Mail) will POST to this URL automatically when the user clicks "Unsubscribe".
 
 ```ts
 // POST /lead/unsubscribe?token=<signed-token>
@@ -91,12 +106,23 @@ const { data, error } = await authClient.lead.unsubscribe({
 
 ### Resend
 
+Resend the confirmation email by `email`:
+
 ```ts
 // POST /lead/resend
 const { data, error } = await authClient.lead.resend({
   email: 'user@example.com',
 });
 ```
+
+Or omit `email` to resend for the currently authenticated user (lead is looked up by the session user's `id`):
+
+```ts
+// POST /lead/resend
+const { data, error } = await authClient.lead.resend();
+```
+
+If neither `email` nor an active session is provided, the endpoint responds with `400 Bad Request` (`EMAIL_OR_SESSION_REQUIRED`).
 
 ### Update
 
@@ -115,6 +141,7 @@ const { data, error } = await authClient.lead.update({
 To enable double opt-in email confirmation, pass a `sendConfirmationEmail` function. It receives a data object with:
 
 - `lead`: The lead object.
+- `email`: The lead's email address.
 - `url`: The URL containing the confirmation token to send to the user.
 - `token`: The confirmation token used to complete the verification.
 - `unsubscribeUrl`: The endpoint URL for one-click unsubscribe (RFC 8058). Use this in `List-Unsubscribe` email headers.
@@ -130,20 +157,20 @@ import { sendEmail } from './email'; // your email sending function
 export const auth = betterAuth({
   plugins: [
     lead({
-      sendConfirmationEmail: async ({ lead, url, token, unsubscribeUrl }) => {
+      sendConfirmationEmail: async ({ lead, email, url, token, unsubscribeUrl }) => {
         const { confirmationSentAt } = lead;
         if (
           confirmationSentAt &&
           Date.now() - confirmationSentAt.getTime() < 60 * 1000 // 1 minute
         ) {
           console.log(
-            `Skipping sending confirmation email to ${lead.email} because a recent email was already sent.`,
+            `Skipping sending confirmation email to ${email} because a recent email was already sent.`,
           );
           return false;
         }
 
         void sendEmail({
-          to: lead.email,
+          to: email,
           subject: 'Newsletter: Confirm your subscription',
           text: `Click the link to confirm your subscription: ${url}`,
           // One-click unsubscribe headers (RFC 8058)
@@ -158,7 +185,7 @@ export const auth = betterAuth({
       },
       onConfirmed: async ({ lead }) => {
         // do something when a lead confirms their subscription
-        console.log(`Lead ${lead.email} has confirmed their subscription!`);
+        console.log(`Lead ${lead} has confirmed their subscription!`);
       },
     }),
   ],
@@ -218,6 +245,11 @@ await authClient.lead.subscribe({
   email: 'user@example.com',
   metadata: { preferences: 'engineering' },
 });
+
+// or for the currently authenticated user (omit email)
+await authClient.lead.subscribe({
+  metadata: { preferences: 'engineering' },
+});
 ```
 
 ## Schema
@@ -253,7 +285,6 @@ model Lead {
 
   @@unique([email])
   @@unique([userId])
-  @@index([userId])
   @@map("lead")
 }
 ```

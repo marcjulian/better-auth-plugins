@@ -15,7 +15,7 @@ export const auth = betterAuth({
   },
   plugins: [
     lead({
-      sendConfirmationEmail: async ({ lead, url, token }) => {
+      sendConfirmationEmail: async ({ lead, email, url, token }) => {
         const { confirmationSentAt } = lead;
         if (
           confirmationSentAt &&
@@ -27,7 +27,7 @@ export const auth = betterAuth({
           return false;
         }
 
-        console.log({ email: lead.email, url, token });
+        console.log({ lead, email, url, token });
 
         return true;
       },

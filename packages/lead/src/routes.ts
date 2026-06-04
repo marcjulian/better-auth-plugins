@@ -1,5 +1,5 @@
 import { BASE_ERROR_CODES, type InternalLogger, type StandardSchemaV1 } from 'better-auth';
-import { APIError, createAuthEndpoint, createEmailVerificationToken } from 'better-auth/api';
+import { APIError, createAuthEndpoint, getSessionFromCtx } from 'better-auth/api';
 import { SignJWT, jwtVerify } from 'jose';
 import type { JWTPayload, JWTVerifyResult } from 'jose';
 import { JWTExpired } from 'jose/errors';
@@ -14,8 +14,10 @@ type InferMetadata<O extends LeadOptions> = O extends {
   ? Out
   : Record<string, any>;
 
+type IdentifierType = 'email' | 'user';
+
 const subscribeSchema = z.object({
-  email: z.string().meta({
+  email: z.string().optional().meta({
     description: 'Email address of the lead',
   }),
   metadata: z.record(z.string(), z.any()).optional().meta({
@@ -32,19 +34,14 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
       metadata: {
         $Infer: {
           body: {} as {
-            email: string;
+            email?: string;
             metadata?: InferMetadata<O>;
           },
         },
       },
     },
     async (ctx) => {
-      const { email } = ctx.body;
-
-      const isValidEmail = z.email().safeParse(email);
-      if (!isValidEmail.success) {
-        throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.INVALID_EMAIL);
-      }
+      const email = ctx.body.email;
 
       const metadata = validateMetadata(
         options,
@@ -52,46 +49,66 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
         ctx.context.logger,
       );
 
-      const normalizedEmail = email.toLowerCase();
+      let identifierType: IdentifierType;
+      let leadIdentifier: string;
+      let leadEmail: string;
+      let createData: LeadPayload;
+
+      if (email) {
+        const isValidEmail = z.email().safeParse(email);
+        if (!isValidEmail.success) {
+          throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.INVALID_EMAIL);
+        }
+
+        leadIdentifier = email.toLowerCase();
+        identifierType = 'email';
+        leadEmail = leadIdentifier;
+        createData = {
+          email: leadIdentifier,
+          metadata: metadata ? JSON.stringify(metadata) : undefined,
+        };
+      } else {
+        const session = await getSessionFromCtx(ctx);
+
+        if (!session) {
+          throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.EMAIL_OR_SESSION_REQUIRED);
+        }
+
+        leadIdentifier = session.user.id;
+        identifierType = 'user';
+        leadEmail = session.user.email;
+        createData = {
+          userId: leadIdentifier,
+          metadata: metadata ? JSON.stringify(metadata) : undefined,
+        };
+      }
+
+      const whereField = identifierType === 'email' ? 'email' : 'userId';
 
       let lead = await ctx.context.adapter.findOne<Lead>({
         model: 'lead',
-        where: [
-          {
-            field: 'email',
-            value: normalizedEmail,
-          },
-        ],
+        where: [{ field: whereField, value: leadIdentifier }],
       });
 
       if (!lead) {
         try {
           lead = await ctx.context.adapter.create<LeadPayload, Lead>({
             model: 'lead',
-            data: {
-              email: normalizedEmail,
-              metadata: metadata ? JSON.stringify(metadata) : undefined,
-            },
+            data: createData,
           });
         } catch (e) {
           ctx.context.logger.info('Error creating lead');
           lead = await ctx.context.adapter.findOne<Lead>({
             model: 'lead',
-            where: [
-              {
-                field: 'email',
-                value: normalizedEmail,
-              },
-            ],
+            where: [{ field: whereField, value: leadIdentifier }],
           });
         }
       }
 
       if (options.sendConfirmationEmail && lead && !lead.confirmed) {
-        const token = await createEmailVerificationToken(
+        const token = await createConfirmationToken(
           ctx.context.secret,
-          normalizedEmail,
-          undefined,
+          { identifier: leadIdentifier, type: identifierType },
           options.expiresIn ?? 3600,
         );
         const url = `${ctx.context.baseURL}/lead/verify?token=${token}`;
@@ -105,7 +122,7 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
         const sent = await options.sendConfirmationEmail(
           {
             lead,
-            email: normalizedEmail,
+            email: leadEmail,
             url,
             token,
             unsubscribeUrl,
@@ -116,8 +133,8 @@ export const subscribe = <O extends LeadOptions>(options: O) =>
         if (sent) {
           await ctx.context.adapter.update<Lead>({
             model: 'lead',
-            where: [{ field: 'email', value: normalizedEmail }],
-            update: { verificationEmailSentAt: new Date() },
+            where: [{ field: whereField, value: leadIdentifier }],
+            update: { confirmationSentAt: new Date() },
           });
         }
       }
@@ -156,16 +173,17 @@ export const verify = <O extends LeadOptions>(options: O) =>
         throw APIError.from('UNAUTHORIZED', LEAD_ERROR_CODES.INVALID_TOKEN);
       }
 
-      const parsed = subscribeSchema.parse(jwt.payload);
+      const confirmationPayloadSchema = z.object({
+        identifier: z.string(),
+        type: z.enum(['email', 'user']),
+      });
+      const parsed = confirmationPayloadSchema.parse(jwt.payload);
+
+      const whereField = parsed.type === 'user' ? 'userId' : 'email';
 
       let lead = await ctx.context.adapter.findOne<Lead>({
         model: 'lead',
-        where: [
-          {
-            field: 'email',
-            value: parsed.email,
-          },
-        ],
+        where: [{ field: whereField, value: parsed.identifier }],
       });
 
       if (!lead) {
@@ -182,12 +200,7 @@ export const verify = <O extends LeadOptions>(options: O) =>
 
       lead = await ctx.context.adapter.update<Lead>({
         model: 'lead',
-        where: [
-          {
-            field: 'email',
-            value: parsed.email,
-          },
-        ],
+        where: [{ field: whereField, value: parsed.identifier }],
         update: {
           confirmed: true,
         },
@@ -278,7 +291,7 @@ export const unsubscribe = <O extends LeadOptions>(options: O) =>
   );
 
 const resendSchema = z.object({
-  email: z.string().meta({
+  email: z.string().optional().meta({
     description: 'Email address to resend the verification email to',
   }),
 });
@@ -291,23 +304,37 @@ export const resend = <O extends LeadOptions>(options: O) =>
       body: resendSchema,
     },
     async (ctx) => {
-      const { email } = ctx.body;
+      const email = ctx.body.email;
 
-      const isValidEmail = z.email().safeParse(email);
-      if (!isValidEmail.success) {
-        throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.INVALID_EMAIL);
+      let identifierType: IdentifierType;
+      let leadIdentifier: string;
+      let leadEmail: string;
+
+      if (email) {
+        const isValidEmail = z.email().safeParse(email);
+        if (!isValidEmail.success) {
+          throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.INVALID_EMAIL);
+        }
+
+        leadIdentifier = email.toLowerCase();
+        identifierType = 'email';
+        leadEmail = leadIdentifier;
+      } else {
+        const session = await getSessionFromCtx(ctx);
+
+        if (!session) {
+          throw APIError.from('BAD_REQUEST', LEAD_ERROR_CODES.EMAIL_OR_SESSION_REQUIRED);
+        }
+        leadIdentifier = session.user.id;
+        identifierType = 'user';
+        leadEmail = session.user.email;
       }
 
-      const normalizedEmail = email.toLowerCase();
+      const whereField = identifierType === 'email' ? 'email' : 'userId';
 
       const lead = await ctx.context.adapter.findOne<Lead>({
         model: 'lead',
-        where: [
-          {
-            field: 'email',
-            value: normalizedEmail,
-          },
-        ],
+        where: [{ field: whereField, value: leadIdentifier }],
       });
 
       if (!lead) {
@@ -316,11 +343,10 @@ export const resend = <O extends LeadOptions>(options: O) =>
         });
       }
 
-      if (options.sendConfirmationEmail && lead && !lead.confirmed) {
-        const token = await createEmailVerificationToken(
+      if (options.sendConfirmationEmail && !lead.confirmed) {
+        const token = await createConfirmationToken(
           ctx.context.secret,
-          normalizedEmail,
-          undefined,
+          { identifier: leadIdentifier, type: identifierType },
           options.expiresIn ?? 3600,
         );
         const url = `${ctx.context.baseURL}/lead/verify?token=${token}`;
@@ -334,7 +360,7 @@ export const resend = <O extends LeadOptions>(options: O) =>
         const sent = await options.sendConfirmationEmail(
           {
             lead,
-            email: normalizedEmail,
+            email: leadEmail,
             url,
             token,
             unsubscribeUrl,
@@ -345,8 +371,8 @@ export const resend = <O extends LeadOptions>(options: O) =>
         if (sent) {
           await ctx.context.adapter.update<Lead>({
             model: 'lead',
-            where: [{ field: 'email', value: normalizedEmail }],
-            update: { verificationEmailSentAt: new Date() },
+            where: [{ field: whereField, value: leadIdentifier }],
+            update: { confirmationSentAt: new Date() },
           });
         }
       }
@@ -424,6 +450,18 @@ export const update = <O extends LeadOptions>(options: O) =>
       });
     },
   );
+
+async function createConfirmationToken(
+  secret: string,
+  payload: { identifier: string; type: IdentifierType },
+  expiresIn: number,
+) {
+  return new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(Math.floor(Date.now() / 1000) + expiresIn)
+    .sign(new TextEncoder().encode(secret));
+}
 
 async function createUnsubscribeToken(secret: string, leadId: string, expiresIn?: number) {
   const jwt = new SignJWT({ id: leadId }).setProtectedHeader({ alg: 'HS256' }).setIssuedAt();
