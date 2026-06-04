@@ -15,8 +15,9 @@ import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmSeparatorImports } from '@spartan-ng/helm/separator';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { toast } from 'ngx-sonner';
+import { Subscription } from 'rxjs';
 
-import { authClient } from '../auth-client';
+import { injectAuthClient } from '../auth/auth-client';
 
 type AuthMode = 'sign-in' | 'sign-up';
 
@@ -192,6 +193,7 @@ type AuthMode = 'sign-in' | 'sign-up';
 })
 export class AuthPanel implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly authClient = injectAuthClient();
 
   readonly mode = signal<AuthMode>('sign-in');
   readonly submitting = signal(false);
@@ -221,13 +223,13 @@ export class AuthPanel implements OnDestroy {
     minLength(s.password, 8, { message: 'Password must be at least 8 characters' });
   });
 
-  private unsubscribeSession?: () => void;
+  private unsubscribeSession?: Subscription;
 
   constructor() {
     this.loadSession();
 
     if (isPlatformBrowser(this.platformId)) {
-      this.unsubscribeSession = authClient.useSession.subscribe((val) => {
+      this.unsubscribeSession = this.authClient.useSession().subscribe((val) => {
         if (val.data) {
           this.session.set(val.data as { user: { name: string; email: string } });
         } else {
@@ -238,7 +240,7 @@ export class AuthPanel implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribeSession?.();
+    this.unsubscribeSession?.unsubscribe();
   }
 
   toggleMode() {
@@ -251,7 +253,7 @@ export class AuthPanel implements OnDestroy {
       this.submitting.set(true);
       const { email, password } = this.signInModel();
 
-      const { data, error } = await authClient.signIn.email({ email, password });
+      const { data, error } = await this.authClient.signIn.email({ email, password });
 
       this.submitting.set(false);
 
@@ -271,7 +273,7 @@ export class AuthPanel implements OnDestroy {
       this.submitting.set(true);
       const { name, email, password } = this.signUpModel();
 
-      const { data, error } = await authClient.signUp.email({ name, email, password });
+      const { data, error } = await this.authClient.signUp.email({ name, email, password });
 
       this.submitting.set(false);
 
@@ -288,7 +290,7 @@ export class AuthPanel implements OnDestroy {
   async signOut() {
     this.signingOut.set(true);
 
-    const { error } = await authClient.signOut();
+    const { error } = await this.authClient.signOut();
 
     this.signingOut.set(false);
 
@@ -304,7 +306,7 @@ export class AuthPanel implements OnDestroy {
     if (!isPlatformBrowser(this.platformId)) return;
 
     try {
-      const { data } = await authClient.getSession();
+      const { data } = await this.authClient.getSession();
       if (data) {
         this.session.set(data as { user: { name: string; email: string } });
       }

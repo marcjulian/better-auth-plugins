@@ -9,7 +9,7 @@ import { toast } from 'ngx-sonner';
 import { injectAuthClient } from '../auth/auth-client';
 
 @Component({
-  selector: 'ba-newsletter',
+  selector: 'ba-newsletter-user',
   imports: [FormField, HlmButtonImports, HlmInputImports, HlmFieldImports, HlmSpinnerImports],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -20,7 +20,7 @@ import { injectAuthClient } from '../auth/auth-client';
       <h2
         class="max-w-xl text-left text-3xl font-semibold tracking-tight text-balance text-gray-900 sm:text-4xl lg:col-span-7"
       >
-        Want product news and updates? Sign up for our newsletter.
+       Sign up as user or with a different email
       </h2>
       <form novalidate class="max-w-md lg:col-span-5" (submit)="subscribe($event)">
         <hlm-field>
@@ -46,7 +46,7 @@ import { injectAuthClient } from '../auth/auth-client';
     </div>
   `,
 })
-export class Newsletter {
+export class NewsletterUser {
   private authClient = injectAuthClient();
 
   model = signal({
@@ -54,7 +54,6 @@ export class Newsletter {
   });
 
   form = form(this.model, (schemaPath) => {
-    required(schemaPath.email, { message: 'Email is required' });
     email(schemaPath.email, { message: 'Invalid email address' });
   });
 

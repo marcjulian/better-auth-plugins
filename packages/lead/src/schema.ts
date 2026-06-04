@@ -21,16 +21,25 @@ export const lead = {
       },
       email: {
         type: 'string',
-        required: true,
+        required: false,
         unique: true,
       },
-      emailVerified: {
+      userId: {
+        type: 'string',
+        required: false,
+        unique: true,
+        references: {
+          model: 'user',
+          field: 'id',
+        },
+      },
+      confirmed: {
         type: 'boolean',
         defaultValue: false,
         required: true,
         input: false,
       },
-      verificationEmailSentAt: {
+      confirmationSentAt: {
         type: 'date',
         required: false,
         input: false,

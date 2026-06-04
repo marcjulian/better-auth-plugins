@@ -8,30 +8,40 @@ export interface LeadOptions {
    * @param data the data object
    * @param request the request object
    */
-  sendVerificationEmail?: (
+  sendConfirmationEmail?: (
     /**
-     * @param lead the lead to send the verification email to
-     * @param url the verification url
-     * @param token the verification token
+     * @param lead the lead to send the confirmation email to
+     * @param email the email address to send the confirmation to
+     * @param url the confirmation url
+     * @param token the confirmation token
+     * @param unsubscribeUrl the one-click unsubscribe URL (RFC 8058) to include in List-Unsubscribe headers
      */
-    data: { lead: Lead; url: string; token: string },
+    data: { lead: Lead; email: string; url: string; token: string; unsubscribeUrl: string },
     request?: Request,
   ) => Promise<boolean>;
 
-  onEmailVerified?: (
+  onConfirmed?: (
     /**
-     * @param lead the lead that was verified
+     * @param lead the lead that confirmed their subscription
      */
     data: { lead: Lead },
     request?: Request,
   ) => Promise<void>;
 
   /**
-   * Number of seconds the verification token is
+   * Number of seconds the confirmation token is
    * valid for.
    * @default 3600 seconds (1 hour)
    */
   expiresIn?: number;
+
+  /**
+   * Number of seconds the unsubscribe token is valid for.
+   * Should be long-lived since users may click the link long
+   * after receiving the email.
+   * @default undefined (no expiry)
+   */
+  unsubscribeExpiresIn?: number;
 
   /**
    * Rate limit configuration for /lead/subscribe and /lead/resend endpoints.
@@ -57,6 +67,26 @@ export interface LeadOptions {
   metadata?: {
     validationSchema?: StandardSchemaV1;
   };
+
+  /**
+   * Admin-only endpoints. Requires the better-auth `admin` plugin to be
+   * registered. When enabled, exposes `GET /lead/list` which returns all
+   * leads to users whose role matches `admin.roles`.
+   */
+  admin?: {
+    /**
+     * Enable admin endpoints (e.g. `/lead/list`).
+     * @default false
+     */
+    enabled?: boolean;
+    /**
+     * Roles allowed to call admin endpoints. The check is performed against
+     * `session.user.role` (added by the admin plugin), which may contain a
+     * comma-separated list of roles.
+     * @default ['admin']
+     */
+    roles?: string[];
+  };
 }
 
 export interface Lead {
@@ -69,16 +99,19 @@ export interface Lead {
 
   updatedAt: Date;
 
-  email: string;
+  email: string | null;
 
-  emailVerified: boolean;
+  userId: string | null;
 
-  verificationEmailSentAt: Date | null;
+  confirmed: boolean;
+
+  confirmationSentAt: Date | null;
 
   metadata?: string;
 }
 
-export type LeadPayload = Omit<
-  Lead,
-  'id' | 'createdAt' | 'updatedAt' | 'emailVerified' | 'verificationEmailSentAt'
->;
+export type LeadPayload = {
+  email?: string | null;
+  userId?: string | null;
+  metadata?: string;
+};

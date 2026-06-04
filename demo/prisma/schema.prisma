@@ -25,6 +25,7 @@ model User {
   accounts      Account[]
 
   cookieconsents CookieConsent[]
+  lead Lead?
 
   @@unique([email])
   @@map("user")
@@ -79,15 +80,18 @@ model Verification {
 }
 
 model Lead {
-  id                      String    @id
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
-  email                   String
-  emailVerified           Boolean   @default(false)
-  verificationEmailSentAt DateTime?
-  metadata                String?
+  id                 String    @id
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  email              String?
+  userId             String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  confirmed          Boolean   @default(false)
+  confirmationSentAt DateTime?
+  metadata           String?
 
   @@unique([email])
+  @@unique([userId])
   @@map("lead")
 }
 

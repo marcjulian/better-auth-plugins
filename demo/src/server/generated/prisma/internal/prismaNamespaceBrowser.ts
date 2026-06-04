@@ -138,8 +138,9 @@ export const LeadScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   email: 'email',
-  emailVerified: 'emailVerified',
-  verificationEmailSentAt: 'verificationEmailSentAt',
+  userId: 'userId',
+  confirmed: 'confirmed',
+  confirmationSentAt: 'confirmationSentAt',
   metadata: 'metadata'
 } as const
 

@@ -13,8 +13,9 @@ import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmSeparatorImports } from '@spartan-ng/helm/separator';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { toast } from 'ngx-sonner';
+import { Subscription } from 'rxjs';
 
-import { authClient, type ConsentModel } from '../auth-client';
+import { injectAuthClient, type ConsentModel } from '../auth/auth-client';
 import { injectAnonymousId } from './cookie-utils';
 
 const CONSENT_VERSION = 'v1';
@@ -155,7 +156,8 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
 export class CookieBanner implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly anonymousId = injectAnonymousId();
-  private unsubscribeSession?: () => void;
+  private readonly authClient = injectAuthClient();
+  private unsubscribeSession?: Subscription;
   private wasLoggedIn = false;
 
   readonly categories = CATEGORIES;
@@ -178,7 +180,7 @@ export class CookieBanner implements OnDestroy {
     // re-fetch consent from the server and update the anonymous ID cookie so
     // that consent survives after logout + page reload.
     if (isPlatformBrowser(this.platformId)) {
-      this.unsubscribeSession = authClient.useSession.subscribe((val) => {
+      this.unsubscribeSession = this.authClient.useSession().subscribe((val) => {
         const isLoggedIn = !!val.data;
         if (!this.wasLoggedIn && isLoggedIn) {
           this.onSessionAcquired();
@@ -189,7 +191,7 @@ export class CookieBanner implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribeSession?.();
+    this.unsubscribeSession?.unsubscribe();
   }
 
   reopenBanner() {
@@ -211,7 +213,7 @@ export class CookieBanner implements OnDestroy {
       marketing: true,
       functional: true,
     };
-    const { error } = await authClient.cookieConsent.setConsent({
+    const { error } = await this.authClient.cookieConsent.setConsent({
       anonymousId: anonId,
       consent: allAccepted,
       consentVersion: CONSENT_VERSION,
@@ -239,7 +241,7 @@ export class CookieBanner implements OnDestroy {
       marketing: false,
       functional: false,
     };
-    const { error } = await authClient.cookieConsent.setConsent({
+    const { error } = await this.authClient.cookieConsent.setConsent({
       anonymousId: anonId,
       consent: allRejected,
       consentVersion: CONSENT_VERSION,
@@ -262,7 +264,7 @@ export class CookieBanner implements OnDestroy {
     const anonId = this.anonymousId.getOrCreate();
 
     const consentValue = { ...this.consent(), necessary: true };
-    const { error } = await authClient.cookieConsent.setConsent({
+    const { error } = await this.authClient.cookieConsent.setConsent({
       anonymousId: anonId,
       consent: consentValue,
       consentVersion: CONSENT_VERSION,
@@ -295,7 +297,7 @@ export class CookieBanner implements OnDestroy {
       }
 
       try {
-        const { data: session } = await authClient.getSession();
+        const { data: session } = await this.authClient.useSession()();
         if (!session) {
           // Not logged in, no anonId → show banner immediately
           this.visible.set(true);
@@ -325,7 +327,7 @@ export class CookieBanner implements OnDestroy {
    * Also persists the anonymous ID cookie so consent survives after logout.
    */
   private async fetchAndApplyConsent(anonymousId?: string) {
-    const { data, error } = await authClient.cookieConsent.getConsent(anonymousId);
+    const { data, error } = await this.authClient.cookieConsent.getConsent(anonymousId);
 
     if (!error && data?.consent && data.versionMatch) {
       this.consent.set(data.consent.consent);

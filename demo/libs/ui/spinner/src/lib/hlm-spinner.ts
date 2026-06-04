@@ -12,9 +12,7 @@ import { classes } from '@spartan-ng/helm/utils';
     role: 'status',
     '[attr.aria-label]': 'ariaLabel()',
   },
-  template: `
-    <ng-icon [name]="icon()" />
-  `,
+  template: ` <ng-icon [name]="icon()" /> `,
 })
 export class HlmSpinner {
   /**
