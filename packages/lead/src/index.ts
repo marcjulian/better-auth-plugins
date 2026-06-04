@@ -1,7 +1,7 @@
 import type { BetterAuthPlugin } from 'better-auth';
 
 import { LEAD_ERROR_CODES } from './error-codes';
-import { resend, subscribe, unsubscribe, update, verify } from './routes';
+import { resend, subscribe, unsubscribe, unsubscribeSession, update, verify } from './routes';
 import { getSchema } from './schema';
 import type { LeadOptions } from './type';
 
@@ -13,6 +13,7 @@ export const lead = <O extends LeadOptions>(options: O = {} as O) => {
       subscribe: subscribe(options),
       verify: verify(options),
       unsubscribe: unsubscribe(options),
+      unsubscribeSession: unsubscribeSession(options),
       resend: resend(options),
       update: update(options),
     },

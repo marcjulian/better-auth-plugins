@@ -104,6 +104,13 @@ const { data, error } = await authClient.lead.unsubscribe({
 });
 ```
 
+For an authenticated user (e.g. from a "Manage preferences" page in your app), use the session-based endpoint. It requires a valid session and deletes the lead associated with the session user's `id`:
+
+```ts
+// POST /lead/unsubscribe-session
+const { data, error } = await authClient.lead.unsubscribeSession();
+```
+
 ### Resend
 
 Resend the confirmation email by `email`:
@@ -126,15 +133,18 @@ If neither `email` nor an active session is provided, the endpoint responds with
 
 ### Update
 
+Update the metadata of the lead associated with the currently authenticated user. Requires a valid session — the lead is looked up by the session user's `id`:
+
 ```ts
 // POST /lead/update
 const { data, error } = await authClient.lead.update({
-  id: 'lead-id',
   metadata: {
     preferences: 'ai',
   },
 });
 ```
+
+If no session is present the endpoint responds with `401 Unauthorized`.
 
 ### Email Confirmation
 

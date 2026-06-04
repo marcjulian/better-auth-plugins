@@ -1,5 +1,10 @@
 import { BASE_ERROR_CODES, type InternalLogger, type StandardSchemaV1 } from 'better-auth';
-import { APIError, createAuthEndpoint, getSessionFromCtx } from 'better-auth/api';
+import {
+  APIError,
+  createAuthEndpoint,
+  getSessionFromCtx,
+  sessionMiddleware,
+} from 'better-auth/api';
 import { SignJWT, jwtVerify } from 'jose';
 import type { JWTPayload, JWTVerifyResult } from 'jose';
 import { JWTExpired } from 'jose/errors';
@@ -290,6 +295,38 @@ export const unsubscribe = <O extends LeadOptions>(options: O) =>
     },
   );
 
+export const unsubscribeSession = <O extends LeadOptions>(_options: O) =>
+  createAuthEndpoint(
+    '/lead/unsubscribe-session',
+    {
+      method: 'POST',
+      use: [sessionMiddleware],
+    },
+    async (ctx) => {
+      const userId = ctx.context.session.user.id;
+
+      const lead = await ctx.context.adapter.findOne<Lead>({
+        model: 'lead',
+        where: [{ field: 'userId', value: userId }],
+      });
+
+      if (!lead) {
+        return ctx.json({
+          status: true,
+        });
+      }
+
+      await ctx.context.adapter.delete({
+        model: 'lead',
+        where: [{ field: 'userId', value: userId }],
+      });
+
+      return ctx.json({
+        status: true,
+      });
+    },
+  );
+
 const resendSchema = z.object({
   email: z.string().optional().meta({
     description: 'Email address to resend the verification email to',
@@ -384,9 +421,6 @@ export const resend = <O extends LeadOptions>(options: O) =>
   );
 
 const updateSchema = z.object({
-  id: z.string().meta({
-    description: 'The id of the lead to update',
-  }),
   metadata: z.record(z.string(), z.any()).optional().meta({
     description: 'Additional metadata to store with the lead',
   }),
@@ -398,26 +432,21 @@ export const update = <O extends LeadOptions>(options: O) =>
     {
       method: 'POST',
       body: updateSchema,
+      use: [sessionMiddleware],
       metadata: {
         $Infer: {
           body: {} as {
-            id: string;
             metadata?: InferMetadata<O>;
           },
         },
       },
     },
     async (ctx) => {
-      const { id } = ctx.body;
+      const userId = ctx.context.session.user.id;
 
       const lead = await ctx.context.adapter.findOne<Lead>({
         model: 'lead',
-        where: [
-          {
-            field: 'id',
-            value: id,
-          },
-        ],
+        where: [{ field: 'userId', value: userId }],
       });
 
       if (!lead) {
@@ -434,12 +463,7 @@ export const update = <O extends LeadOptions>(options: O) =>
 
       await ctx.context.adapter.update<Lead>({
         model: 'lead',
-        where: [
-          {
-            field: 'id',
-            value: id,
-          },
-        ],
+        where: [{ field: 'userId', value: userId }],
         update: {
           metadata: metadata ? JSON.stringify(metadata) : undefined,
         },
