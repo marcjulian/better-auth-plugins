@@ -146,6 +146,50 @@ const { data, error } = await authClient.lead.update({
 
 If no session is present the endpoint responds with `401 Unauthorized`.
 
+### List (admin)
+
+Optional admin endpoint to list all leads. Requires the better-auth [`admin`](https://www.better-auth.com/docs/plugins/admin) plugin to be registered, and must be opted in via `admin.enabled`:
+
+```ts
+// server/auth.ts
+import { betterAuth } from 'better-auth';
+import { admin } from 'better-auth/plugins';
+import { lead } from 'better-auth-lead';
+
+export const auth = betterAuth({
+  plugins: [
+    admin(),
+    lead({
+      admin: {
+        enabled: true,
+        // Optional. Roles allowed to call /lead/list. Default: ['admin'].
+        // Checked against session.user.role (admin plugin supports
+        // comma-separated roles).
+        roles: ['admin', 'editor'],
+      },
+    }),
+  ],
+});
+```
+
+```ts
+// GET /lead/list?limit=100&offset=0
+const { data, error } = await authClient.lead.list({
+  query: {
+    limit: 100, // optional, default 100, max 1000
+    offset: 0, // optional, default 0
+  },
+});
+```
+
+The response includes the page of `leads`, the `total` number of leads in the database, and the resolved `limit` and `offset` for client-side pagination.
+
+Responses:
+
+- `404 Not Found` (`ADMIN_PLUGIN_REQUIRED`) if the admin plugin is not registered.
+- `403 Forbidden` (`FORBIDDEN`) if the session user's role is not in `admin.roles`.
+- `401 Unauthorized` if no session is present.
+
 ### Email Confirmation
 
 To enable double opt-in email confirmation, pass a `sendConfirmationEmail` function. It receives a data object with:

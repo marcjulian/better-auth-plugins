@@ -1,6 +1,4 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { NgIcon, provideIcons } from '@ng-icons/core';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 
 import { injectAuthUser } from '../auth/auth-client';

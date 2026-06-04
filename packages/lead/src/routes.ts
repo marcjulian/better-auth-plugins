@@ -475,6 +475,62 @@ export const update = <O extends LeadOptions>(options: O) =>
     },
   );
 
+const listQuerySchema = z.object({
+  limit: z.coerce
+    .number()
+    .meta({
+      description: 'The number of lead to return',
+    })
+    .optional(),
+  offset: z.coerce
+    .number()
+    .meta({
+      description: 'The offset to start from',
+    })
+    .optional(),
+});
+
+export const list = <O extends LeadOptions>(options: O) =>
+  createAuthEndpoint(
+    '/lead/list',
+    {
+      method: 'GET',
+      query: listQuerySchema,
+      use: [sessionMiddleware],
+    },
+    async (ctx) => {
+      if (!ctx.context.hasPlugin('admin')) {
+        throw APIError.from('NOT_FOUND', LEAD_ERROR_CODES.ADMIN_PLUGIN_REQUIRED);
+      }
+
+      const allowedRoles = options.admin?.roles ?? ['admin'];
+      const userRole = (ctx.context.session.user as { role?: string }).role ?? '';
+      const userRoles = userRole
+        .split(',')
+        .map((r) => r.trim())
+        .filter(Boolean);
+      const hasRole = userRoles.some((r) => allowedRoles.includes(r));
+
+      if (!hasRole) {
+        throw APIError.from('FORBIDDEN', LEAD_ERROR_CODES.FORBIDDEN);
+      }
+
+      const limit = ctx.query.limit ?? 100;
+      const offset = ctx.query.offset ?? 0;
+
+      const [leads, total] = await Promise.all([
+        ctx.context.adapter.findMany<Lead>({
+          model: 'lead',
+          limit,
+          offset,
+        }),
+        ctx.context.adapter.count({ model: 'lead' }),
+      ]);
+
+      return ctx.json({ leads, total, limit, offset });
+    },
+  );
+
 async function createConfirmationToken(
   secret: string,
   payload: { identifier: string; type: IdentifierType },

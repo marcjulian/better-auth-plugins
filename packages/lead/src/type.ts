@@ -67,6 +67,26 @@ export interface LeadOptions {
   metadata?: {
     validationSchema?: StandardSchemaV1;
   };
+
+  /**
+   * Admin-only endpoints. Requires the better-auth `admin` plugin to be
+   * registered. When enabled, exposes `GET /lead/list` which returns all
+   * leads to users whose role matches `admin.roles`.
+   */
+  admin?: {
+    /**
+     * Enable admin endpoints (e.g. `/lead/list`).
+     * @default false
+     */
+    enabled?: boolean;
+    /**
+     * Roles allowed to call admin endpoints. The check is performed against
+     * `session.user.role` (added by the admin plugin), which may contain a
+     * comma-separated list of roles.
+     * @default ['admin']
+     */
+    roles?: string[];
+  };
 }
 
 export interface Lead {
