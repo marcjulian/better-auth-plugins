@@ -12,15 +12,16 @@ import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmSeparatorImports } from '@spartan-ng/helm/separator';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
+import type { DefaultConsentModel } from 'better-auth-cookie-consent/client';
 import { toast } from 'ngx-sonner';
 import { Subscription } from 'rxjs';
 
-import { injectAuthClient, type ConsentModel } from '../auth/auth-client';
+import { injectAuthClient } from '../auth/auth-client';
 import { injectAnonymousId } from './cookie-utils';
 
 const CONSENT_VERSION = 'v1';
 
-type CategoryId = keyof ConsentModel;
+type CategoryId = keyof DefaultConsentModel;
 
 const CATEGORIES: { id: CategoryId; label: string; description: string; locked: boolean }[] = [
   {
@@ -166,7 +167,7 @@ export class CookieBanner implements OnDestroy {
   readonly loading = signal(false);
   readonly consentRecorded = signal(false);
 
-  readonly consent = signal<ConsentModel>({
+  readonly consent = signal<DefaultConsentModel>({
     necessary: true,
     analytics: false,
     marketing: false,
@@ -207,7 +208,7 @@ export class CookieBanner implements OnDestroy {
     this.loading.set(true);
     const anonId = this.anonymousId.getOrCreate();
 
-    const allAccepted: ConsentModel = {
+    const allAccepted: DefaultConsentModel = {
       necessary: true,
       analytics: true,
       marketing: true,
@@ -235,7 +236,7 @@ export class CookieBanner implements OnDestroy {
     this.loading.set(true);
     const anonId = this.anonymousId.getOrCreate();
 
-    const allRejected: ConsentModel = {
+    const allRejected: DefaultConsentModel = {
       necessary: true,
       analytics: false,
       marketing: false,

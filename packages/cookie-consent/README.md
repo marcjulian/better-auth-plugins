@@ -7,7 +7,7 @@ GDPR-compliant cookie consent management plugin for [Better Auth](https://better
 - Automatic merge of anonymous consent on sign-in / sign-up
 - Consent versioning with automatic invalidation
 - Validation schema support (e.g. Zod) to enforce consent shape
-- Generic client plugin — `cookieConsentClient<z.infer<typeof schema>>()` types your consent model end-to-end
+- Generic client plugin — `cookieConsentClient<DefaultConsentModel>()` types your consent model end-to-end
 
 ## How It Works
 
@@ -113,7 +113,7 @@ export const auth = betterAuth({
 The plugin validates consent JSON against a `StandardSchemaV1` (e.g. Zod schema) on every write. A preset `defaultConsentSchema` is exported for the standard categories:
 
 ```ts
-import { defaultConsentSchema } from 'better-auth-cookie-consent';
+import { defaultConsentSchema } from 'better-auth-cookie-consent/client';
 
 // Equivalent to:
 // z.object({
@@ -126,19 +126,14 @@ import { defaultConsentSchema } from 'better-auth-cookie-consent';
 
 ## Client Setup
 
-The client plugin accepts a generic type parameter for the consent shape. Use `z.infer<typeof schema>` to get full end-to-end typing:
+The client plugin accepts a generic type parameter for the consent shape. Use `DefaultConsentModel` to get full end-to-end typing:
 
 ```ts
 import { createAuthClient } from 'better-auth/client';
-import { defaultConsentSchema } from 'better-auth-cookie-consent';
-import { cookieConsentClient } from 'better-auth-cookie-consent/client';
-import type { z } from 'zod';
-
-type ConsentModel = z.infer<typeof defaultConsentSchema>;
-// { necessary: boolean; analytics: boolean; marketing: boolean; functional: boolean }
+import { cookieConsentClient, type DefaultConsentModel } from 'better-auth-cookie-consent/client';
 
 export const authClient = createAuthClient({
-  plugins: [cookieConsentClient<ConsentModel>()],
+  plugins: [cookieConsentClient<DefaultConsentModel>()],
 });
 ```
 
@@ -250,11 +245,9 @@ The consent object is validated against the server's `validationSchema` on every
 Use `keyof` on the inferred consent model to type your banner categories:
 
 ```ts
-import type { z } from 'zod';
-import { defaultConsentSchema } from 'better-auth-cookie-consent';
+import { type DefaultConsentModel } from 'better-auth-cookie-consent/client';
 
-type ConsentModel = z.infer<typeof defaultConsentSchema>;
-type CategoryId = keyof ConsentModel;
+type CategoryId = keyof DefaultConsentModel;
 
 const CATEGORIES: { id: CategoryId; label: string }[] = [
   { id: 'necessary', label: 'Necessary' },

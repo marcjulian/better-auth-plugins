@@ -1,8 +1,8 @@
 import type { BetterAuthClientPlugin } from 'better-auth/client';
 import { atom } from 'nanostores';
+import type z from 'zod';
 
-// import { COOKIE_CONSENT_ERROR_CODES } from './error-codes';
-import type { Consent, cookieConsentPlugin } from './index';
+import type { Consent, cookieConsentPlugin, defaultConsentSchema } from './index';
 
 /**
  * Client-side consent state, kept in sync with the server.
@@ -14,18 +14,21 @@ export interface ConsentState<TConsent extends Consent = Consent> {
 }
 
 /**
+ * Inferred type from the default consent schema.
+ */
+export type DefaultConsentModel = z.infer<typeof defaultConsentSchema>;
+
+/**
  * Client plugin for cookie consent management.
  *
- * @typeParam TConsent - The consent shape, typically `z.infer<typeof yourConsentSchema>`.
+ * @typeParam TConsent - The consent shape, defaults to `DefaultConsentModel`.
  *
  * @example
  * ```ts
- * import { defaultConsentSchema } from 'better-auth-cookie-consent';
- * import { cookieConsentClient } from 'better-auth-cookie-consent/client';
- * import type { z } from 'zod';
+ * import { cookieConsentClient, type DefaultConsentModel } from 'better-auth-cookie-consent/client';
  *
  * const authClient = createAuthClient({
- *   plugins: [cookieConsentClient<z.infer<typeof defaultConsentSchema>>()],
+ *   plugins: [cookieConsentClient<DefaultConsentModel>()],
  * });
  * ```
  */
