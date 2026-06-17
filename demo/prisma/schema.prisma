@@ -24,8 +24,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  cookieconsents CookieConsent[]
   lead Lead?
+  cookieConsent CookieConsent?
 
   @@unique([email])
   @@map("user")
@@ -104,5 +104,7 @@ model CookieConsent {
   consentVersion String
   timestamp      DateTime
 
+  @@unique([userId])
+  @@unique([anonymousId])
   @@map("cookieConsent")
 }
