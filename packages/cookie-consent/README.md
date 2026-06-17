@@ -289,30 +289,36 @@ The plugin registers a server-side `after` hook that runs on every `sign-in/*` a
 
 When the `consentVersion` option changes, the `getConsent` endpoint returns `versionMatch: false` so the client knows to prompt for re-consent.
 
-## Database Schema
+## Schema
 
-The plugin creates a `cookieConsent` table:
+### CookieConsent
 
-| Column         | Type    | Description                      |
-| -------------- | ------- | -------------------------------- |
-| id             | string  | Primary key                      |
-| userId         | string? | References user table            |
-| anonymousId    | string  | Anonymous client identifier      |
-| consent        | string  | JSON-encoded consent preferences |
-| consentVersion | string  | Consent policy version           |
-| timestamp      | date    | When consent was recorded        |
+Table name: `cookieConsent`
 
-### Prisma Schema
+| Field          | Type    | Key    | Description                               |
+| -------------- | ------- | ------ | ----------------------------------------- |
+| id             | string  | pk     | Unique identifier for each consent record |
+| userId         | string? | unique | ID of an associated better-auth user      |
+| anonymousId    | string  | unique | Anonymous client identifier               |
+| consent        | string  |        | JSON-encoded consent preferences          |
+| consentVersion | string  |        | Consent policy version                    |
+| timestamp      | date    |        | When consent was recorded                 |
+
+#### Prisma
 
 ```prisma
 model CookieConsent {
-  id             String   @id @default(cuid())
+  id             String   @id
   userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   anonymousId    String
   consent        String
   consentVersion String
-  timestamp      DateTime @default(now())
-  user           User?    @relation(fields: [userId], references: [id])
+  timestamp      DateTime
+
+  @@unique([userId])
+  @@unique([anonymousId])
+  @@map("cookieConsent")
 }
 ```
 

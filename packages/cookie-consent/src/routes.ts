@@ -201,20 +201,22 @@ export async function mergeAnonymousConsentToUser(
   });
 
   if (userRecord) {
-    // User already has consent; update with anonymous data
+    // User already has consent; merge anonymous preferences into the
+    // existing record. Delete the anonymous record first so the new
+    // anonymousId can be carried over without a unique-constraint conflict.
+    await adapter.delete({
+      model: 'cookieConsent',
+      where: [{ field: 'id', value: anonymousRecord.id }],
+    });
     await adapter.update<CookieConsentRecord>({
       model: 'cookieConsent',
       where: [{ field: 'id', value: userRecord.id }],
       update: {
         consent: anonymousRecord.consent,
         consentVersion: anonymousRecord.consentVersion,
-        anonymousId,
+        anonymousId: anonymousRecord.anonymousId,
         timestamp: new Date(),
       },
-    });
-    await adapter.delete({
-      model: 'cookieConsent',
-      where: [{ field: 'id', value: anonymousRecord.id }],
     });
   } else {
     // Attach anonymous consent to user

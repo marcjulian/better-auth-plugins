@@ -332,10 +332,10 @@ model Lead {
   updatedAt          DateTime  @updatedAt
   email              String?
   userId             String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   confirmed          Boolean   @default(false)
   confirmationSentAt DateTime?
   metadata           String?
-  user               User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([email])
   @@unique([userId])
