@@ -19,5 +19,19 @@ This generates the boilerplate files (`package.json`, `tsdown.config.ts`, `tscon
 ### After scaffolding
 
 1. Implement your plugin logic inside `src/`.
-2. Add a `build:<plugin-name>` script to the root `package.json` and reference it in the top-level `build` script.
-3. Add an entry for the new plugin in the root `README.md`.
+2. Add an entry for the new plugin in the root `README.md`.
+
+## Releasing a New Version
+
+1. Bump the version in the plugin's `packages/<plugin>/package.json` (or use `bumpp`).
+2. Commit the change.
+3. Push a tag matching `{plugin-dir}-v{version}`, for example:
+
+   ```bash
+   git tag cookie-consent-v0.2.0
+   git push origin cookie-consent-v0.2.0
+   ```
+
+   The tag name **must match the plugin's directory name** under `packages/`. The CI workflow will build the package and publish it to npm automatically.
+
+> Note: Publishing requires an `NPM_TOKEN` secret set in the GitHub repository.

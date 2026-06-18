@@ -4,10 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "cd demo && pnpm start",
-    "build": "pnpm build:lead && pnpm build:cookie-consent",
+    "build": "pnpm --filter './packages/**' build",
     "build:demo": "cd demo && pnpm build",
-    "build:lead": "cd packages/lead && pnpm build",
-    "build:cookie-consent": "cd packages/cookie-consent && pnpm build",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check"
   },
