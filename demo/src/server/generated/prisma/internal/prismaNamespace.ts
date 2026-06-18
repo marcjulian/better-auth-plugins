@@ -388,7 +388,8 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
-  Lead: 'Lead'
+  Lead: 'Lead',
+  CookieConsent: 'CookieConsent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -404,7 +405,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "lead"
+    modelProps: "user" | "session" | "account" | "verification" | "lead" | "cookieConsent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -778,6 +779,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CookieConsent: {
+      payload: Prisma.$CookieConsentPayload<ExtArgs>
+      fields: Prisma.CookieConsentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CookieConsentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CookieConsentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload>
+        }
+        findFirst: {
+          args: Prisma.CookieConsentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CookieConsentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload>
+        }
+        findMany: {
+          args: Prisma.CookieConsentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload>[]
+        }
+        create: {
+          args: Prisma.CookieConsentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload>
+        }
+        createMany: {
+          args: Prisma.CookieConsentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CookieConsentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload>[]
+        }
+        delete: {
+          args: Prisma.CookieConsentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload>
+        }
+        update: {
+          args: Prisma.CookieConsentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload>
+        }
+        deleteMany: {
+          args: Prisma.CookieConsentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CookieConsentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CookieConsentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload>[]
+        }
+        upsert: {
+          args: Prisma.CookieConsentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CookieConsentPayload>
+        }
+        aggregate: {
+          args: Prisma.CookieConsentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCookieConsent>
+        }
+        groupBy: {
+          args: Prisma.CookieConsentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CookieConsentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CookieConsentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CookieConsentCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -887,6 +962,18 @@ export const LeadScalarFieldEnum = {
 } as const
 
 export type LeadScalarFieldEnum = (typeof LeadScalarFieldEnum)[keyof typeof LeadScalarFieldEnum]
+
+
+export const CookieConsentScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  anonymousId: 'anonymousId',
+  consent: 'consent',
+  consentVersion: 'consentVersion',
+  timestamp: 'timestamp'
+} as const
+
+export type CookieConsentScalarFieldEnum = (typeof CookieConsentScalarFieldEnum)[keyof typeof CookieConsentScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1067,6 +1154,7 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
   lead?: Prisma.LeadOmit
+  cookieConsent?: Prisma.CookieConsentOmit
 }
 
 /* Types for Logging */

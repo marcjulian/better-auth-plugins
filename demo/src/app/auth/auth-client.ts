@@ -1,12 +1,13 @@
 import { computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { cookieConsentClient, type DefaultConsentModel } from 'better-auth-cookie-consent/client';
 import { leadClient } from 'better-auth-lead/client';
 
 import type { LeadMetadata } from '../../shared/lead-metadata-schema';
 import { createAuthClient } from './better-auth-adapter';
 
 export const injectAuthClient = createAuthClient({
-  plugins: [leadClient<LeadMetadata>()],
+  plugins: [leadClient<LeadMetadata>(), cookieConsentClient<DefaultConsentModel>()],
 });
 
 export const injectAuthSession = () => {

@@ -1,0 +1,48 @@
+{
+  "name": "better-auth-cookie-consent",
+  "version": "0.1.1",
+  "description": "Better Auth Cookie Consent plugin for GDPR-compliant consent management",
+  "homepage": "https://github.com/marcjulian/better-auth-plugins#readme",
+  "bugs": {
+    "url": "https://github.com/marcjulian/better-auth-plugins/issues"
+  },
+  "license": "MIT",
+  "author": "Marc Stammerjohann <me@marcjulian.de>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcjulian/better-auth-plugins.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./client": "./dist/client.mjs",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "nanostores": "^1.1.1",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.5",
+    "bumpp": "^10.4.1",
+    "tsdown": "catalog:",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "better-auth": "1.6.11"
+  }
+}

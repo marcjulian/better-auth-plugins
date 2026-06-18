@@ -4,5 +4,6 @@ packages:
 
 catalog:
   better-auth: ^1.6.11
+  auth: ^1.6.11
   tsdown: ^0.22.0
   zod: ^4.4.3

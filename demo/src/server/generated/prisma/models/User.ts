@@ -200,6 +200,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
+  cookieconsents?: Prisma.CookieConsentListRelationFilter
   lead?: Prisma.XOR<Prisma.LeadNullableScalarRelationFilter, Prisma.LeadWhereInput> | null
 }
 
@@ -213,6 +214,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
+  cookieconsents?: Prisma.CookieConsentOrderByRelationAggregateInput
   lead?: Prisma.LeadOrderByWithRelationInput
 }
 
@@ -229,6 +231,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
+  cookieconsents?: Prisma.CookieConsentListRelationFilter
   lead?: Prisma.XOR<Prisma.LeadNullableScalarRelationFilter, Prisma.LeadWhereInput> | null
 }, "id" | "email">
 
@@ -268,6 +271,7 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  cookieconsents?: Prisma.CookieConsentCreateNestedManyWithoutUserInput
   lead?: Prisma.LeadCreateNestedOneWithoutUserInput
 }
 
@@ -281,6 +285,7 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  cookieconsents?: Prisma.CookieConsentUncheckedCreateNestedManyWithoutUserInput
   lead?: Prisma.LeadUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -294,6 +299,7 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  cookieconsents?: Prisma.CookieConsentUpdateManyWithoutUserNestedInput
   lead?: Prisma.LeadUpdateOneWithoutUserNestedInput
 }
 
@@ -307,6 +313,7 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  cookieconsents?: Prisma.CookieConsentUncheckedUpdateManyWithoutUserNestedInput
   lead?: Prisma.LeadUncheckedUpdateOneWithoutUserNestedInput
 }
 
@@ -440,6 +447,22 @@ export type UserUpdateOneWithoutLeadNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLeadInput, Prisma.UserUpdateWithoutLeadInput>, Prisma.UserUncheckedUpdateWithoutLeadInput>
 }
 
+export type UserCreateNestedOneWithoutCookieconsentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCookieconsentsInput, Prisma.UserUncheckedCreateWithoutCookieconsentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCookieconsentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutCookieconsentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCookieconsentsInput, Prisma.UserUncheckedCreateWithoutCookieconsentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCookieconsentsInput
+  upsert?: Prisma.UserUpsertWithoutCookieconsentsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCookieconsentsInput, Prisma.UserUpdateWithoutCookieconsentsInput>, Prisma.UserUncheckedUpdateWithoutCookieconsentsInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id: string
   name: string
@@ -449,6 +472,7 @@ export type UserCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  cookieconsents?: Prisma.CookieConsentCreateNestedManyWithoutUserInput
   lead?: Prisma.LeadCreateNestedOneWithoutUserInput
 }
 
@@ -461,6 +485,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  cookieconsents?: Prisma.CookieConsentUncheckedCreateNestedManyWithoutUserInput
   lead?: Prisma.LeadUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -489,6 +514,7 @@ export type UserUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  cookieconsents?: Prisma.CookieConsentUpdateManyWithoutUserNestedInput
   lead?: Prisma.LeadUpdateOneWithoutUserNestedInput
 }
 
@@ -501,6 +527,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  cookieconsents?: Prisma.CookieConsentUncheckedUpdateManyWithoutUserNestedInput
   lead?: Prisma.LeadUncheckedUpdateOneWithoutUserNestedInput
 }
 
@@ -513,6 +540,7 @@ export type UserCreateWithoutAccountsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  cookieconsents?: Prisma.CookieConsentCreateNestedManyWithoutUserInput
   lead?: Prisma.LeadCreateNestedOneWithoutUserInput
 }
 
@@ -525,6 +553,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  cookieconsents?: Prisma.CookieConsentUncheckedCreateNestedManyWithoutUserInput
   lead?: Prisma.LeadUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -553,6 +582,7 @@ export type UserUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  cookieconsents?: Prisma.CookieConsentUpdateManyWithoutUserNestedInput
   lead?: Prisma.LeadUpdateOneWithoutUserNestedInput
 }
 
@@ -565,6 +595,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  cookieconsents?: Prisma.CookieConsentUncheckedUpdateManyWithoutUserNestedInput
   lead?: Prisma.LeadUncheckedUpdateOneWithoutUserNestedInput
 }
 
@@ -578,6 +609,7 @@ export type UserCreateWithoutLeadInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  cookieconsents?: Prisma.CookieConsentCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLeadInput = {
@@ -590,6 +622,7 @@ export type UserUncheckedCreateWithoutLeadInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  cookieconsents?: Prisma.CookieConsentUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLeadInput = {
@@ -618,6 +651,7 @@ export type UserUpdateWithoutLeadInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  cookieconsents?: Prisma.CookieConsentUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLeadInput = {
@@ -630,6 +664,75 @@ export type UserUncheckedUpdateWithoutLeadInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  cookieconsents?: Prisma.CookieConsentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCookieconsentsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  lead?: Prisma.LeadCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCookieconsentsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  lead?: Prisma.LeadUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCookieconsentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCookieconsentsInput, Prisma.UserUncheckedCreateWithoutCookieconsentsInput>
+}
+
+export type UserUpsertWithoutCookieconsentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCookieconsentsInput, Prisma.UserUncheckedUpdateWithoutCookieconsentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCookieconsentsInput, Prisma.UserUncheckedCreateWithoutCookieconsentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCookieconsentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCookieconsentsInput, Prisma.UserUncheckedUpdateWithoutCookieconsentsInput>
+}
+
+export type UserUpdateWithoutCookieconsentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  lead?: Prisma.LeadUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCookieconsentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  lead?: Prisma.LeadUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -640,11 +743,13 @@ export type UserUncheckedUpdateWithoutLeadInput = {
 export type UserCountOutputType = {
   sessions: number
   accounts: number
+  cookieconsents: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
+  cookieconsents?: boolean | UserCountOutputTypeCountCookieconsentsArgs
 }
 
 /**
@@ -671,6 +776,13 @@ export type UserCountOutputTypeCountAccountsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.AccountWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCookieconsentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CookieConsentWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -682,6 +794,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
+  cookieconsents?: boolean | Prisma.User$cookieconsentsArgs<ExtArgs>
   lead?: boolean | Prisma.User$leadArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -720,6 +833,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
+  cookieconsents?: boolean | Prisma.User$cookieconsentsArgs<ExtArgs>
   lead?: boolean | Prisma.User$leadArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -731,6 +845,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     accounts: Prisma.$AccountPayload<ExtArgs>[]
+    cookieconsents: Prisma.$CookieConsentPayload<ExtArgs>[]
     lead: Prisma.$LeadPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1137,6 +1252,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  cookieconsents<T extends Prisma.User$cookieconsentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cookieconsentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CookieConsentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lead<T extends Prisma.User$leadArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$leadArgs<ExtArgs>>): Prisma.Prisma__LeadClient<runtime.Types.Result.GetResult<Prisma.$LeadPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1607,6 +1723,30 @@ export type User$accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.AccountScalarFieldEnum | Prisma.AccountScalarFieldEnum[]
+}
+
+/**
+ * User.cookieconsents
+ */
+export type User$cookieconsentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CookieConsent
+   */
+  select?: Prisma.CookieConsentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CookieConsent
+   */
+  omit?: Prisma.CookieConsentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CookieConsentInclude<ExtArgs> | null
+  where?: Prisma.CookieConsentWhereInput
+  orderBy?: Prisma.CookieConsentOrderByWithRelationInput | Prisma.CookieConsentOrderByWithRelationInput[]
+  cursor?: Prisma.CookieConsentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CookieConsentScalarFieldEnum | Prisma.CookieConsentScalarFieldEnum[]
 }
 
 /**
