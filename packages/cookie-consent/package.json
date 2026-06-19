@@ -1,6 +1,6 @@
 {
   "name": "better-auth-cookie-consent",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Better Auth Cookie Consent plugin for GDPR-compliant consent management",
   "homepage": "https://github.com/marcjulian/better-auth-plugins#readme",
   "bugs": {
