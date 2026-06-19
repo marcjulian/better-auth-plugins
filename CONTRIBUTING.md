@@ -23,15 +23,18 @@ This generates the boilerplate files (`package.json`, `tsdown.config.ts`, `tscon
 
 ## Releasing a New Version
 
-1. Bump the version in the plugin's `packages/<plugin>/package.json` (or use `bumpp`).
-2. Commit the change.
-3. Push a tag matching `{plugin-dir}-v{version}`, for example:
+Run the release script at the project root:
 
-   ```bash
-   git tag cookie-consent-v0.2.0
-   git push origin cookie-consent-v0.2.0
-   ```
+```bash
+pnpm release
+```
 
-   The tag name **must match the plugin's directory name** under `packages/`. The CI workflow will build the package and publish it to npm automatically.
+It will prompt for which plugin to release and the bump type (patch/minor/major), then bump the version, commit, and create a git tag automatically.
+
+After the script finishes, push the tag to trigger the publish workflow:
+
+```bash
+git push --follow-tags
+```
 
 > Note: Publishing requires an `NPM_TOKEN` secret set in the GitHub repository.

@@ -6,8 +6,12 @@
     "start": "cd demo && pnpm start",
     "build": "pnpm --filter './packages/**' build",
     "build:demo": "cd demo && pnpm build",
+    "release": "node scripts/release.mjs",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.5.1"
   },
   "devDependencies": {
     "oxfmt": "^0.52.0"
