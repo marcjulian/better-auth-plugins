@@ -49,6 +49,35 @@ await authClient.signIn.email({
 | `siteKeys` | `Record<string, string>` | Map of site keys to secret keys. The site key is read from the token. |
 | `endpoints` | `string[]` | Auth endpoints to protect. Defaults to sign-up (email), sign-in (email), and request-password-reset. |
 
+## Protecting other plugin endpoints
+
+Pass `endpoints` to extend protection to routes from other plugins. Note that overriding `endpoints` replaces the defaults, so re-list the auth routes you still want protected:
+
+```ts
+import { betterAuth } from 'better-auth';
+import { capCaptcha } from 'cap-captcha';
+import { lead } from 'better-auth-lead';
+
+export const auth = betterAuth({
+  plugins: [
+    lead(),
+    capCaptcha({
+      providerUrl: 'https://cap.example.com',
+      siteKeys: {
+        'site-key-1': 'secret-1',
+      },
+      endpoints: [
+        '/sign-up/email',
+        '/sign-in/email',
+        '/request-password-reset',
+        '/lead/subscribe',
+        '/lead/resend',
+      ],
+    }),
+  ],
+});
+```
+
 ## Development
 
 - Install dependencies: `pnpm install`
