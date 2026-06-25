@@ -2,7 +2,7 @@ import type { BetterAuthPlugin } from 'better-auth';
 
 import { cap } from './cap';
 import { defaultEndpoints } from './constants';
-import { EXTERNAL_ERROR_CODES, INTERNAL_ERROR_CODES } from './error-codes';
+import { EXTERNAL_ERROR_CODES } from './error-codes';
 import { middlewareResponse } from './middleware-response';
 import type { CapOptions } from './types';
 import { PACKAGE_VERSION } from './version';
@@ -48,10 +48,6 @@ export const captcha = (options: CapOptions) =>
           return undefined;
         }
 
-        if (!options.secretKey) {
-          throw new Error(INTERNAL_ERROR_CODES.MISSING_SECRET_KEY.message);
-        }
-
         const captchaResponse = request.headers.get('x-captcha-response');
 
         if (!captchaResponse) {
@@ -62,9 +58,20 @@ export const captcha = (options: CapOptions) =>
           });
         }
 
+        const siteKey = captchaResponse.split(':')[0];
+        const secretKey = options.siteKeys[siteKey];
+
+        if (!secretKey) {
+          return middlewareResponse({
+            message: EXTERNAL_ERROR_CODES.VERIFICATION_FAILED.message,
+            code: EXTERNAL_ERROR_CODES.VERIFICATION_FAILED.code,
+            status: 403,
+          });
+        }
+
         return await cap({
           providerUrl: options.providerUrl,
-          secretKey: options.secretKey,
+          secretKey,
           captchaResponse,
         });
       } catch (_error) {

@@ -8,6 +8,5 @@ export const EXTERNAL_ERROR_CODES = defineErrorCodes({
 
 // These error codes are only visible in the server logs
 export const INTERNAL_ERROR_CODES = defineErrorCodes({
-  MISSING_SECRET_KEY: 'Missing secret key',
   SERVICE_UNAVAILABLE: 'CAPTCHA service unavailable',
 });
