@@ -43,11 +43,11 @@ await authClient.signIn.email({
 
 ## Options
 
-| Option | Type | Description |
-| --- | --- | --- |
-| `providerUrl` | `string` | URL of your Cap instance, e.g. `https://cap.example.com`. |
-| `siteKeys` | `Record<string, string>` | Map of site keys to secret keys. The site key is read from the token. |
-| `endpoints` | `string[]` | Auth endpoints to protect. Defaults to sign-up (email), sign-in (email), and request-password-reset. |
+| Option        | Type                     | Description                                                                                          |
+| ------------- | ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `providerUrl` | `string`                 | URL of your Cap instance, e.g. `https://cap.example.com`.                                            |
+| `siteKeys`    | `Record<string, string>` | Map of site keys to secret keys. The site key is read from the token.                                |
+| `endpoints`   | `string[]`               | Auth endpoints to protect. Defaults to sign-up (email), sign-in (email), and request-password-reset. |
 
 ## Protecting other plugin endpoints
 
