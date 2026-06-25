@@ -9,17 +9,17 @@ import { PACKAGE_VERSION } from './version';
 
 declare module 'better-auth' {
   interface BetterAuthPluginRegistry<AuthOptions, Options> {
-    captcha: {
-      creator: typeof captcha;
+    'cap-captcha': {
+      creator: typeof capCaptcha;
     };
   }
 }
 
 export type * from './types';
 
-export const captcha = (options: CapOptions) =>
+export const capCaptcha = (options: CapOptions) =>
   ({
-    id: 'captcha',
+    id: 'cap-captcha',
     version: PACKAGE_VERSION,
     $ERROR_CODES: EXTERNAL_ERROR_CODES,
     onRequest: async (request, ctx) => {

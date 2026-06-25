@@ -1,9 +1,9 @@
 import { expect, test } from 'vitest';
 
-import { captcha } from '../src';
+import { capCaptcha } from '../src';
 
-test('captcha plugin', () => {
-  const plugin = captcha({
+test('capCaptcha plugin', () => {
+  const plugin = capCaptcha({
     providerUrl: 'https://cap.example.com',
     siteKeys: {
       'site-key-1': 'secret-1',
@@ -11,6 +11,6 @@ test('captcha plugin', () => {
     },
   });
 
-  expect(plugin.id).toBe('captcha');
+  expect(plugin.id).toBe('cap-captcha');
   expect(plugin.$ERROR_CODES).toBeDefined();
 });

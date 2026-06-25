@@ -12,11 +12,11 @@ pnpm add cap-captcha
 
 ```ts
 import { betterAuth } from 'better-auth';
-import { captcha } from 'cap-captcha';
+import { capCaptcha } from 'cap-captcha';
 
 export const auth = betterAuth({
   plugins: [
-    captcha({
+    capCaptcha({
       providerUrl: 'https://your-cap-instance',
       siteKeys: {
         'site-key-1': 'secret-1',
