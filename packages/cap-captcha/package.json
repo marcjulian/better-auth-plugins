@@ -1,5 +1,5 @@
 {
-  "name": "cap-captcha",
+  "name": "better-auth-cap-captcha",
   "version": "0.0.0",
   "description": "Cap CAPTCHA plugin for better-auth.",
   "homepage": "https://github.com/marcjulian/better-auth-plugins#readme",
