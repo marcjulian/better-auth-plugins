@@ -3,7 +3,7 @@ packages:
   - demo
 
 catalog:
-  "@types/node": ^25.6.2
+  '@types/node': ^25.6.2
   auth: ^1.6.11
   better-auth: ^1.6.11
   bumpp: ^11.1.0
