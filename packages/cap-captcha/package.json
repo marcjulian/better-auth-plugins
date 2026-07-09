@@ -1,6 +1,6 @@
 {
   "name": "better-auth-cap-captcha",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Cap CAPTCHA plugin for better-auth.",
   "homepage": "https://github.com/marcjulian/better-auth-plugins#readme",
   "bugs": {
