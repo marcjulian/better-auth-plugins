@@ -1,0 +1,12 @@
+import { defineErrorCodes } from 'better-auth';
+
+export const EXTERNAL_ERROR_CODES = defineErrorCodes({
+  VERIFICATION_FAILED: 'Captcha verification failed',
+  MISSING_RESPONSE: 'Missing CAPTCHA response',
+  UNKNOWN_ERROR: 'Something went wrong',
+});
+
+// These error codes are only visible in the server logs
+export const INTERNAL_ERROR_CODES = defineErrorCodes({
+  SERVICE_UNAVAILABLE: 'CAPTCHA service unavailable',
+});
