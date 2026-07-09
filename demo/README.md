@@ -10,6 +10,14 @@ copy .env.dev .env
 docker compose up -d
 ```
 
+To additionally start the Cap CAPTCHA server (and its Valkey backend) alongside PostgreSQL, pass both compose files with `-f`:
+
+```bash
+docker compose -f compose.yml -f compose.cap.yml up -d
+```
+
+The Cap server will be available at [localhost:3001](http://localhost:3001).
+
 Start the demo application and visit [localhost:5174](http://localhost:5174) in your browser:
 
 ```bash
