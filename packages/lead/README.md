@@ -146,9 +146,14 @@ const { data, error } = await authClient.lead.update({
 
 If no session is present the endpoint responds with `401 Unauthorized`.
 
-### List (admin)
+### Admin
 
-Optional admin endpoint to list all leads. Requires the better-auth [`admin`](https://www.better-auth.com/docs/plugins/admin) plugin to be registered, and must be opted in via `admin.enabled`:
+The lead plugin ships with a set of admin-only endpoints to manage leads: `listLead`, `getLead`, and `removeLead`. They are only available when:
+
+1. The better-auth [`admin`](https://www.better-auth.com/docs/plugins/admin) plugin is registered.
+2. The `admin.enabled` lead option is set to `true`.
+
+Enable them in your auth config:
 
 ```ts
 // server/auth.ts
@@ -162,8 +167,9 @@ export const auth = betterAuth({
     lead({
       admin: {
         enabled: true,
-        // Optional. Roles allowed to call /lead/list. Default: ['admin'].
-        // Checked against session.user.role (admin plugin supports
+        // Optional. Roles allowed to call the admin endpoints.
+        // Default: ['admin'].
+        // Checked against session.user.role (the admin plugin supports
         // comma-separated roles).
         roles: ['admin', 'editor'],
       },
@@ -172,11 +178,23 @@ export const auth = betterAuth({
 });
 ```
 
+#### List leads
+
+List a page of leads with optional search, filter, sort, and pagination. Requires a session with a role in `admin.roles`.
+
 ```ts
-// GET /lead/list?limit=100&offset=0
-const { data, error } = await authClient.lead.list({
+// GET /lead/list-leads
+const { data, error } = await authClient.lead.listLeads({
   query: {
-    limit: 100, // optional, default 100, max 1000
+    searchValue: 'user@example.com', // optional
+    searchField: 'email', // optional, default 'email'
+    searchOperator: 'contains', // optional: 'contains' | 'starts_with' | 'ends_with'
+    filterField: 'confirmed', // optional
+    filterValue: true, // optional
+    filterOperator: 'eq', // optional: any better-auth where operator
+    sortBy: 'createdAt', // optional
+    sortDirection: 'desc', // optional: 'asc' | 'desc'
+    limit: 100, // optional, default 100
     offset: 0, // optional, default 0
   },
 });
@@ -184,9 +202,41 @@ const { data, error } = await authClient.lead.list({
 
 The response includes the page of `leads`, the `total` number of leads in the database, and the resolved `limit` and `offset` for client-side pagination.
 
-Responses:
+#### Get a lead
 
-- `404 Not Found` (`ADMIN_PLUGIN_REQUIRED`) if the admin plugin is not registered.
+Fetch a single lead by `id`. Requires a session with a role in `admin.roles`.
+
+```ts
+// POST /lead/get-lead
+const { data, error } = await authClient.lead.getLead({
+  query: {
+    id: 'lead-id',
+  },
+});
+```
+
+Returns the lead object, or `404 Not Found` (`LEAD_NOT_FOUND`) if no lead matches the id.
+
+#### Remove a lead
+
+Delete a single lead by `id`. Requires a session with a role in `admin.roles`.
+
+```ts
+// POST /lead/remove-lead
+const { data, error } = await authClient.lead.removeLead({
+  body: {
+    leadId: 'lead-id',
+  },
+});
+```
+
+Returns `{ success: true }` on success, or `404 Not Found` (`LEAD_NOT_FOUND`) if no lead matches the id.
+
+#### Responses
+
+All admin endpoints share the following responses:
+
+- `404 Not Found` (`ADMIN_PLUGIN_REQUIRED`) if the admin plugin is not registered or `admin.enabled` is not set.
 - `403 Forbidden` (`FORBIDDEN`) if the session user's role is not in `admin.roles`.
 - `401 Unauthorized` if no session is present.
 
