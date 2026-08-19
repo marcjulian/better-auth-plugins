@@ -620,9 +620,9 @@ const getLeadQuerySchema = z.object({
 
 export const getLead = <O extends LeadOptions>(options: O) =>
   createAuthEndpoint(
-    'lead/get-lead',
+    '/lead/get-lead',
     {
-      method: 'POST',
+      method: 'GET',
       query: getLeadQuerySchema,
       use: [sessionMiddleware],
     },
@@ -664,7 +664,7 @@ const removeLeadBodySchema = z.object({
 
 export const removeLead = <O extends LeadOptions>(options: O) =>
   createAuthEndpoint(
-    'lead/remove-lead',
+    '/lead/remove-lead',
     {
       method: 'POST',
       body: removeLeadBodySchema,
