@@ -2,6 +2,7 @@ import type { BetterAuthPlugin } from 'better-auth';
 
 import { LEAD_ERROR_CODES } from './error-codes';
 import {
+  getLead,
   list,
   removeLead,
   resend,
@@ -22,7 +23,13 @@ export const lead = <O extends LeadOptions>(options: O = {} as O) => {
     unsubscribeSession: unsubscribeSession(options),
     resend: resend(options),
     update: update(options),
-    ...(options.admin?.enabled ? { list: list(options), removeLead: removeLead(options) } : {}),
+    ...(options.admin?.enabled
+      ? {
+          list: list(options),
+          getLead: getLead(options),
+          removeLead: removeLead(options),
+        }
+      : {}),
   };
 
   return {
