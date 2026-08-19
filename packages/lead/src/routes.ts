@@ -1,4 +1,10 @@
-import { BASE_ERROR_CODES, type InternalLogger, type StandardSchemaV1 } from 'better-auth';
+import {
+  BASE_ERROR_CODES,
+  type InternalLogger,
+  type StandardSchemaV1,
+  type Where,
+} from 'better-auth';
+import { whereOperators } from 'better-auth/adapters';
 import {
   APIError,
   createAuthEndpoint,
@@ -476,6 +482,22 @@ export const update = <O extends LeadOptions>(options: O) =>
   );
 
 const listQuerySchema = z.object({
+  searchValue: z.string().optional().meta({
+    description: 'The value to search for. Eg: "some name"',
+  }),
+  searchField: z
+    .enum(['email'])
+    .meta({
+      description: 'The field to search in, defaults to email.',
+    })
+    .optional(),
+  searchOperator: z
+    .enum(['contains', 'starts_with', 'ends_with'])
+    .meta({
+      description:
+        'The operator to use for the search. Can be `contains`, `starts_with` or `ends_with`. Eg: "contains"',
+    })
+    .optional(),
   limit: z.coerce
     .number()
     .meta({
@@ -486,6 +508,40 @@ const listQuerySchema = z.object({
     .number()
     .meta({
       description: 'The offset to start from',
+    })
+    .optional(),
+  sortBy: z
+    .string()
+    .meta({
+      description: 'The field to sort by',
+    })
+    .optional(),
+  sortDirection: z
+    .enum(['asc', 'desc'])
+    .meta({
+      description: 'The direction to sort by',
+    })
+    .optional(),
+  filterField: z
+    .string()
+    .meta({
+      description: 'The field to filter by',
+    })
+    .optional(),
+  filterValue: z
+    .string()
+    .meta({
+      description: 'The value to filter by',
+    })
+    .or(z.number())
+    .or(z.boolean())
+    .or(z.array(z.string()))
+    .or(z.array(z.number()))
+    .optional(),
+  filterOperator: z
+    .enum(whereOperators)
+    .meta({
+      description: 'The operator to use for the filter',
     })
     .optional(),
 });
@@ -515,6 +571,24 @@ export const list = <O extends LeadOptions>(options: O) =>
         throw APIError.from('FORBIDDEN', LEAD_ERROR_CODES.FORBIDDEN);
       }
 
+      const where: Where[] = [];
+
+      if (ctx.query?.searchValue) {
+        where.push({
+          field: ctx.query.searchField || 'email',
+          operator: ctx.query.searchOperator || 'contains',
+          value: ctx.query.searchValue,
+        });
+      }
+
+      if (ctx.query?.filterValue !== undefined) {
+        where.push({
+          field: ctx.query.filterField || 'email',
+          operator: ctx.query.filterOperator || 'eq',
+          value: ctx.query.filterValue,
+        });
+      }
+
       const limit = ctx.query.limit ?? 100;
       const offset = ctx.query.offset ?? 0;
 
@@ -523,6 +597,13 @@ export const list = <O extends LeadOptions>(options: O) =>
           model: 'lead',
           limit,
           offset,
+          ...(ctx.query.sortBy && {
+            sortBy: {
+              field: ctx.query.sortBy,
+              direction: ctx.query.sortDirection || 'asc',
+            },
+          }),
+          where: where.length ? where : undefined,
         }),
         ctx.context.adapter.count({ model: 'lead' }),
       ]);
