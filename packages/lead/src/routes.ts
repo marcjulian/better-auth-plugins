@@ -612,6 +612,55 @@ export const list = <O extends LeadOptions>(options: O) =>
     },
   );
 
+const removeLeadBodySchema = z.object({
+  leadId: z.coerce.string().meta({
+    description: 'The lead id',
+  }),
+});
+
+export const removeLead = <O extends LeadOptions>(options: O) =>
+  createAuthEndpoint(
+    'lead/remove-lead',
+    {
+      method: 'POST',
+      body: removeLeadBodySchema,
+      use: [sessionMiddleware],
+    },
+    async (ctx) => {
+      if (!ctx.context.hasPlugin('admin')) {
+        throw APIError.from('NOT_FOUND', LEAD_ERROR_CODES.ADMIN_PLUGIN_REQUIRED);
+      }
+
+      const allowedRoles = options.admin?.roles ?? ['admin'];
+      const userRole = (ctx.context.session.user as { role?: string }).role ?? '';
+      const userRoles = userRole
+        .split(',')
+        .map((r) => r.trim())
+        .filter(Boolean);
+      const hasRole = userRoles.some((r) => allowedRoles.includes(r));
+
+      if (!hasRole) {
+        throw APIError.from('FORBIDDEN', LEAD_ERROR_CODES.FORBIDDEN);
+      }
+
+      const lead = await ctx.context.adapter.findOne<Lead>({
+        model: 'lead',
+        where: [{ field: 'id', value: ctx.body.leadId }],
+      });
+
+      if (!lead) {
+        throw APIError.from('NOT_FOUND', LEAD_ERROR_CODES.LEAD_NOT_FOUND);
+      }
+
+      await ctx.context.adapter.delete({
+        model: 'lead',
+        where: [{ field: 'id', value: ctx.body.leadId }],
+      });
+
+      return ctx.json({ success: true });
+    },
+  );
+
 async function createConfirmationToken(
   secret: string,
   payload: { identifier: string; type: IdentifierType },
