@@ -546,9 +546,9 @@ const listQuerySchema = z.object({
     .optional(),
 });
 
-export const list = <O extends LeadOptions>(options: O) =>
+export const listLeads = <O extends LeadOptions>(options: O) =>
   createAuthEndpoint(
-    '/lead/list',
+    '/lead/list-leads',
     {
       method: 'GET',
       query: listQuerySchema,
