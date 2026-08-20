@@ -1,0 +1,17 @@
+{
+  "name": "api",
+  "type": "module",
+  "imports": {
+    "#*": "./*"
+  },
+  "scripts": {
+    "build": "nitro build",
+    "dev": "nitro dev",
+    "preview": "nitro preview"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "nitro": "3.0.260610-beta",
+    "typescript": "catalog:"
+  }
+}

@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "cd demo && pnpm start",
+    "start": "pnpm --filter api dev & pnpm --filter app start",
     "build": "pnpm --filter './packages/**' build",
-    "build:demo": "cd demo && pnpm build",
+    "build:demo": "pnpm --filter api build && pnpm --filter app build",
     "release": "node scripts/release.mjs",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check"
