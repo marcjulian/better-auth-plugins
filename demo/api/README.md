@@ -22,5 +22,5 @@ Then checkout the [Nitro documentation](https://nitro.build/deploy) to learn mor
 Run the following command to update prisma schema base on the Better Auth configuration:
 
 ```bash
-pnpm dlx auth generate --config server/utils/auth.ts
+pnpm auth generate --config server/utils/auth.ts
 ```

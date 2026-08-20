@@ -20,6 +20,12 @@ export const routes: Routes = [
     canActivate: [redirectLoggedInGuard],
   },
   {
+    path: 'newsletter',
+    loadComponent: () =>
+      import('./pages/demo/newsletter/newsletter.page').then((m) => m.NewsletterPage),
+    title: 'Newsletter',
+  },
+  {
     path: 'forbidden',
     loadComponent: () => import('./pages/forbidden.page').then((m) => m.ForbiddenPage),
     title: 'Forbidden',

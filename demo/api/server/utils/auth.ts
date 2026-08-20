@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth';
+import { lead } from 'better-auth-lead';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { admin } from 'better-auth/plugins';
 
@@ -17,5 +18,28 @@ export default betterAuth({
   },
   database: prismaAdapter(prisma, { provider: 'sqlite' }),
   emailAndPassword: { enabled: true },
-  plugins: [admin()],
+  plugins: [
+    admin(),
+    lead({
+      sendConfirmationEmail: async ({ lead, email, url, token }) => {
+        const { confirmationSentAt } = lead;
+        if (
+          confirmationSentAt &&
+          Date.now() - confirmationSentAt.getTime() < 60 * 1000 // 1 minute
+        ) {
+          console.log(
+            `Skipping sending confirmation email to ${lead.email} because a recent email was already sent.`,
+          );
+          return false;
+        }
+
+        console.log({ lead, email, url, token });
+
+        return true;
+      },
+      onConfirmed: async ({ lead }) => {
+        console.log({ lead });
+      },
+    }),
+  ],
 });

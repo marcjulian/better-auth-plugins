@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { hlm } from '@spartan-ng/helm/utils';
+import { ClassValue } from 'clsx';
 
 import { Header } from './header';
 
@@ -9,9 +11,12 @@ import { Header } from './header';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-header />
-    <main>
+    <main [class]="_computedMainClass()">
       <ng-content />
     </main>
   `,
 })
-export class BaseLayout {}
+export class BaseLayout {
+  public readonly mainClass = input<ClassValue>('');
+  protected readonly _computedMainClass = computed(() => hlm('', this.mainClass()));
+}

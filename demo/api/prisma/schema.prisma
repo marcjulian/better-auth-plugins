@@ -27,6 +27,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  lead Lead?
+
   @@unique([email])
   @@map("user")
 }
@@ -78,4 +80,20 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Lead {
+  id                 String    @id
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  email              String?
+  userId             String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  confirmed          Boolean   @default(false)
+  confirmationSentAt DateTime?
+  metadata           String?
+
+  @@unique([email])
+  @@unique([userId])
+  @@map("lead")
 }
