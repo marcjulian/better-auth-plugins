@@ -2,6 +2,16 @@ packages:
   - packages/**
   - demo
 
+allowBuilds:
+  '@parcel/watcher': false
+  '@prisma/engines': false
+  esbuild: false
+  less: false
+  lmdb: false
+  msgpackr-extract: false
+  nx: false
+  prisma: false
+
 catalog:
   '@better-auth/prisma-adapter': 1.6.23
   '@types/node': ^25.6.2
