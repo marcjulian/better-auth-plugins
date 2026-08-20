@@ -31,12 +31,13 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@typescript/native-preview": "7.0.0-dev.20260509.2",
+    "better-auth": "catalog:",
     "bumpp": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "better-auth": "^1.5.0"
+    "better-auth": "^1.6.0"
   }
 }

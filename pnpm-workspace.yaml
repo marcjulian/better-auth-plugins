@@ -3,9 +3,10 @@ packages:
   - demo
 
 catalog:
+  '@better-auth/prisma-adapter': 1.6.23
   '@types/node': ^25.6.2
-  auth: ^1.6.11
-  better-auth: ^1.6.11
+  auth: 1.6.23
+  better-auth: 1.6.23
   bumpp: ^11.1.0
   tsdown: ^0.22.0
   typescript: ^6.0.3

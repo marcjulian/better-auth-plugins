@@ -1,4 +1,4 @@
-import type { BetterAuthClientPlugin } from 'better-auth/client';
+import type { BetterAuthClientPlugin, BetterFetch } from 'better-auth/client';
 import { atom } from 'nanostores';
 import type z from 'zod';
 
@@ -37,7 +37,7 @@ export const cookieConsentClient = <TConsent extends Consent = Consent>() => {
     id: 'cookie-consent',
     $InferServerPlugin: {} as ReturnType<typeof cookieConsentPlugin>,
 
-    getAtoms($fetch) {
+    getAtoms() {
       const $consent = atom<ConsentState<TConsent>>({
         consent: null,
         consentVersion: null,
@@ -46,7 +46,7 @@ export const cookieConsentClient = <TConsent extends Consent = Consent>() => {
       return { $consent };
     },
 
-    getActions($fetch, $store) {
+    getActions($fetch: BetterFetch, $store) {
       const consentAtom = $store.atoms.$consent as ReturnType<typeof atom<ConsentState<TConsent>>>;
 
       async function syncFromServer(anonymousId?: string) {
