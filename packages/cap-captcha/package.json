@@ -30,7 +30,6 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "@typescript/native-preview": "7.0.0-dev.20260509.2",
     "better-auth": "catalog:",
     "bumpp": "catalog:",
     "tsdown": "catalog:",

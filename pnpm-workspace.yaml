@@ -18,7 +18,7 @@ catalog:
   auth: 1.6.23
   better-auth: 1.6.23
   bumpp: ^11.1.0
-  tsdown: ^0.22.0
-  typescript: ^6.0.3
-  vitest: ^4.1.7
+  tsdown: ^0.22.14
+  typescript: ^7.0.2
+  vitest: ^4.1.11
   zod: ^4.4.3
