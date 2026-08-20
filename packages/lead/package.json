@@ -37,12 +37,13 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "better-auth": "catalog:",
     "bumpp": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "better-auth": "^1.5.0"
+    "better-auth": "^1.6.0"
   }
 }
