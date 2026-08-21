@@ -1,8 +1,8 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "singleQuote": true,
-  "experimentalSortImports": {},
-  "experimentalTailwindcss": {
+  "sortImports": {},
+  "sortTailwindcss": {
     "functions": ["hlm", "cva", "classes"]
   },
   "ignorePatterns": ["demo/src/server/generated/prisma/**/*"]

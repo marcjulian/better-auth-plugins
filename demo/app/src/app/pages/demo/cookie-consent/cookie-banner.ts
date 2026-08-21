@@ -1,12 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnDestroy,
-  PLATFORM_ID,
-  signal,
-} from '@angular/core';
+import { Component, inject, OnDestroy, PLATFORM_ID, signal } from '@angular/core';
 import { toast } from '@spartan-ng/brain/sonner';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCheckboxImports } from '@spartan-ng/helm/checkbox';
@@ -59,10 +52,7 @@ const CATEGORIES: { id: CategoryId; label: string; description: string; locked: 
     HlmSeparatorImports,
     HlmSpinnerImports,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
+  host: { class: 'block' },
   template: `
     @if (visible()) {
       <div class="bg-background fixed inset-x-0 bottom-0 z-50 border-t p-6 shadow-lg">
