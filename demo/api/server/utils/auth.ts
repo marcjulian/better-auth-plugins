@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth';
+import { cookieConsentPlugin, defaultConsentSchema } from 'better-auth-cookie-consent';
 import { lead } from 'better-auth-lead';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { admin } from 'better-auth/plugins';
@@ -39,6 +40,12 @@ export default betterAuth({
       },
       onConfirmed: async ({ lead }) => {
         console.log({ lead });
+      },
+    }),
+    cookieConsentPlugin({
+      consentVersion: 'v1',
+      consent: {
+        validationSchema: defaultConsentSchema,
       },
     }),
   ],

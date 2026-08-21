@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { email, form, FormField, required, submit } from '@angular/forms/signals';
 import { toast } from '@spartan-ng/brain/sonner';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
@@ -11,7 +11,6 @@ import { injectAuthClient } from '../../../auth/auth-client';
 @Component({
   selector: 'app-newsletter',
   imports: [FormField, HlmButtonImports, HlmInputImports, HlmFieldImports, HlmSpinnerImports],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block py-16',
   },

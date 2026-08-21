@@ -26,6 +26,12 @@ export const routes: Routes = [
     title: 'Newsletter',
   },
   {
+    path: 'cookie-consent',
+    loadComponent: () =>
+      import('./pages/demo/cookie-consent/cookie-consent.page').then((m) => m.CookieConsentPage),
+    title: 'Newsletter',
+  },
+  {
     path: 'forbidden',
     loadComponent: () => import('./pages/forbidden.page').then((m) => m.ForbiddenPage),
     title: 'Forbidden',

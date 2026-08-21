@@ -39,11 +39,11 @@ type Plugin = {
 export class HomePage {
   plugins: Plugin[] = [
     { name: 'Lead', description: 'Use for newsletter or wishlist', link: '/newsletter' },
-    // {
-    //   name: 'Cookie Consent',
-    //   description: 'GDPR-compliant cookie consent management',
-    //   link: '/cookie-consent',
-    // },
+    {
+      name: 'Cookie Consent',
+      description: 'GDPR-compliant cookie consent management',
+      link: '/cookie-consent',
+    },
     // {
     //   name: 'Cap Captcha',
     //   description: 'Add Cap CAPTCHA to your Auth Endpoints',

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { BaseLayout } from '../../../layouts/base.layout';
 import { Newsletter } from './newsletter';

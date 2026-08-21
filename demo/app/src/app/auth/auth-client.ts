@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { cookieConsentClient, DefaultConsentModel } from 'better-auth-cookie-consent/client';
 import { leadClient } from 'better-auth-lead/client';
 import { adminClient } from 'better-auth/client/plugins';
 
@@ -8,7 +9,7 @@ import { createAuthClient } from './better-auth-adapter';
 
 export const injectAuthClient = createAuthClient({
   baseURL: environment.apiUrl,
-  plugins: [adminClient(), leadClient()],
+  plugins: [adminClient(), leadClient(), cookieConsentClient<DefaultConsentModel>()],
 });
 
 export const injectAuthSession = () => {
