@@ -5,5 +5,5 @@
   "sortTailwindcss": {
     "functions": ["hlm", "cva", "classes"]
   },
-  "ignorePatterns": ["demo/src/server/generated/prisma/**/*"]
+  "ignorePatterns": ["demo/api/server/utils/generated/prisma/**/*"]
 }
