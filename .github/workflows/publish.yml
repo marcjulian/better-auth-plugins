@@ -34,7 +34,7 @@ jobs:
       - name: Build
         run: pnpm build
       - name: Publish to npm
-        run: pnpm publish --no-git-checks --access public
+        run: pnpm publish --no-git-checks --access public --provenance
         working-directory: ${{ steps.tag.outputs.dir }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
