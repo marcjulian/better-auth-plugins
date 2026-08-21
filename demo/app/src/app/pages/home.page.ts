@@ -19,7 +19,7 @@ type Plugin = {
     <app-base-layout mainClass="mx-auto max-w-(--breakpoint-lg) px-4">
       <div class="flex flex-col gap-4 py-10">
         <span hlmBadge>Better Auth plugins</span>
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           @for (plugin of plugins; track $index) {
             <hlm-card>
               <hlm-card-header>
