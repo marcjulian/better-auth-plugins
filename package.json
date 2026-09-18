@@ -11,8 +11,8 @@
     "fmt:check": "oxfmt --check"
   },
   "devDependencies": {
-    "@clack/prompts": "1.7.0",
-    "oxfmt": "0.64.0"
+    "@clack/prompts": "1.8.1",
+    "oxfmt": "0.68.0"
   },
   "packageManager": "pnpm@11.22.0"
 }

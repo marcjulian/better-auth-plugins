@@ -11,20 +11,20 @@
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "catalog:",
-    "@prisma/adapter-pg": "^7.9.1",
-    "@prisma/client": "^7.9.1",
+    "@prisma/adapter-pg": "7.10",
+    "@prisma/client": "7.10",
     "better-auth": "catalog:",
     "better-auth-cookie-consent": "workspace:",
     "better-auth-lead": "workspace:",
-    "dotenv": "^17.4.2",
-    "pg": "^8.23.0"
+    "dotenv": "17.4.2",
+    "pg": "8.23.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "@types/pg": "^8.23.1",
+    "@types/pg": "8.23.1",
     "auth": "catalog:",
-    "nitro": "3.0.260610-beta",
-    "prisma": "^7.9.1",
+    "nitro": "3.0.260903-beta",
+    "prisma": "7.10.0",
     "typescript": "catalog:"
   }
 }

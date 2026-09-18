@@ -6,7 +6,7 @@ import { admin } from 'better-auth/plugins';
 
 import prisma from './db';
 
-export default betterAuth({
+export const auth = betterAuth({
   baseURL: process.env['API_URL'],
   secret: process.env['BETTER_AUTH_SECRET'],
   trustedOrigins: [process.env['APP_URL']!],
@@ -50,3 +50,5 @@ export default betterAuth({
     }),
   ],
 });
+
+export default { fetch: auth.handler };
